@@ -69,12 +69,13 @@ jobs:
               [ -z "$tool_id" ] && continue
               echo "Creating release for ${tool_id} v${version}..."
               tag_name="${tool_id}-${version}"
+              # Delete release and tag if they already exist to ensure clean overwrite
+              gh release delete "$tag_name" -y --cleanup-tag -R "$GITHUB_REPOSITORY" || true
               # Create release or overwrite existing asset using gh cli
               if ! gh release create "$tag_name" "$zip_path" \
                 -R "$GITHUB_REPOSITORY" \
                 --title "${tool_id} v${version}" \
-                --notes "OmniForge community tool package for ${tool_id}." \
-                --clobber > release_error.log 2>&1; then
+                --notes "OmniForge community tool package for ${tool_id}." > release_error.log 2>&1; then
                 echo "Release creation failed for $tag_name. Log:"
                 cat release_error.log
                 git config --global user.name "github-actions[bot]"
