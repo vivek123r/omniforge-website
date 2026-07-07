@@ -1,0 +1,12 @@
+{
+  "id": "uuid-generator",
+  "name": "UUID Generator",
+  "description": "Generate single or batch UUID v4 or v1 identifiers.",
+  "version": "1.0.0",
+  "category": "utilities",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["uuid", "guid", "generator", "id"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py"
+}

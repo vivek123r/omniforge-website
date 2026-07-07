@@ -1,0 +1,12 @@
+{
+  "id": "base64-converter",
+  "name": "Base64 Converter",
+  "description": "Encode or decode strings using Base64 format.",
+  "version": "1.0.0",
+  "category": "utilities",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["base64", "encoder", "decoder", "binary"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py"
+}

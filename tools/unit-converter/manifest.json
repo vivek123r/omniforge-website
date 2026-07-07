@@ -1,0 +1,12 @@
+{
+  "id": "unit-converter",
+  "name": "Unit Converter",
+  "description": "Convert values between different units of length, weight, speed, temperature, and data.",
+  "version": "1.0.0",
+  "category": "utilities",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["units", "converter", "metric", "data"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py"
+}

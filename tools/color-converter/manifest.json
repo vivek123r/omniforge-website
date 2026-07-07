@@ -1,0 +1,12 @@
+{
+  "id": "color-converter",
+  "name": "Color Converter",
+  "description": "Convert colors between Hex, RGB, and HSL formats.",
+  "version": "1.0.0",
+  "category": "design",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["color", "converter", "hex", "rgb", "hsl"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py"
+}

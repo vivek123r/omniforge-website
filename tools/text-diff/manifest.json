@@ -1,0 +1,12 @@
+{
+  "id": "text-diff",
+  "name": "Text Diff Checker",
+  "description": "Compare two text contents line-by-line and identify differences.",
+  "version": "1.0.0",
+  "category": "developers",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["diff", "compare", "text", "git"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py"
+}

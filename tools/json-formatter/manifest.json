@@ -1,0 +1,12 @@
+{
+  "id": "json-formatter",
+  "name": "JSON Formatter",
+  "description": "Beautify, minify, and validate JSON data.",
+  "version": "1.0.0",
+  "category": "developers",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["json", "formatter", "beautify", "minify"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py"
+}

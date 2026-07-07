@@ -1,0 +1,12 @@
+{
+  "id": "timestamp-converter",
+  "name": "Timestamp Converter",
+  "description": "Convert Unix epoch timestamps to human-readable dates and vice versa.",
+  "version": "1.0.0",
+  "category": "utilities",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["time", "timestamp", "epoch", "date"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py"
+}
