@@ -72,7 +72,7 @@ jobs:
               gh release create "$tag_name" "$zip_path" \
                 --title "${tool_id} v${version}" \
                 --notes "OmniForge community tool package for ${tool_id}." \
-                --clobber || echo "Release creation completed for $tag_name"
+                --clobber
             done < dist_tools/release_packages.txt
           else
             echo "No packages list found to release."
