@@ -18,19 +18,37 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2 # Fetch last 2 commits to perform diff comparisons against HEAD~1
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-level: '3.10'
+          python-version: '3.10'
 
       - name: Package Tools and Generate Registry
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          python scripts/package_tools.py
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Workflow manually triggered. Packaging all tools..."
+            python scripts/package_tools.py
+          else
+            echo "Push triggered. Detecting changed tools..."
+            # Get unique directories under tools/ that have changes
+            changed_folders=$(git diff --name-only HEAD~1 | grep '^tools/' | cut -d/ -f2 | sort -u)
+            
+            if [ -z "$changed_folders" ]; then
+              echo "No files changed inside tools/ folder."
+              mkdir -p dist_tools
+              touch dist_tools/release_packages.txt
+            else
+              echo "Changes detected in: $changed_folders"
+              # Convert newline separated list to spaces
+              build_args=$(echo "$changed_folders" | tr '\n' ' ')
+              python scripts/package_tools.py $build_args
+            fi
+          fi
 
       - name: Commit and Push registry index
         run: |
@@ -46,6 +64,8 @@ jobs:
         run: |
           if [ -f dist_tools/release_packages.txt ]; then
             while IFS=, read -r tool_id version zip_path; do
+              # Ensure line is not empty
+              [ -z "$tool_id" ] && continue
               echo "Creating release for ${tool_id} v${version}..."
               tag_name="${tool_id}-${version}"
               # Create release or overwrite existing asset using gh cli

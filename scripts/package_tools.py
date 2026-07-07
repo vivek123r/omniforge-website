@@ -2,6 +2,7 @@ import os
 import json
 import zipfile
 import hashlib
+import sys
 from pathlib import Path
 
 def compute_sha256(file_path):
@@ -12,7 +13,11 @@ def compute_sha256(file_path):
     return sha256.hexdigest()
 
 def package_tools():
-    # Use environment variables if in GitHub Actions, else fallback defaults
+    # Parse target tools passed as arguments (if any)
+    target_tools = sys.argv[1:] if len(sys.argv) > 1 else None
+    if target_tools:
+        print(f"Incremental mode active. Target tools to build: {target_tools}")
+
     repo = os.environ.get("GITHUB_REPOSITORY", "vivek123r/omniforge-website")
     branch = os.environ.get("GITHUB_REF_NAME", "main")
     
@@ -23,7 +28,7 @@ def package_tools():
     
     index_json_path = root_dir / "index.json"
     
-    # Load existing index.json if it exists, to preserve other tools or merge
+    # Load existing registry
     registry = {"tools": {}}
     if index_json_path.exists():
         try:
@@ -41,19 +46,26 @@ def package_tools():
         if not tool_folder.is_dir():
             continue
             
+        tool_id = tool_folder.name
+        
+        # If in incremental mode, skip tools that are not in target_tools
+        if target_tools is not None and tool_id not in target_tools:
+            print(f"Skipping {tool_id} (unchanged)")
+            continue
+            
         manifest_path = tool_folder / "manifest.json"
         if not manifest_path.exists():
-            print(f"Skipping {tool_folder.name}: no manifest.json found")
+            print(f"Skipping {tool_id}: no manifest.json found")
             continue
             
         try:
             with open(manifest_path, "r", encoding="utf-8") as f:
                 manifest = json.load(f)
         except Exception as e:
-            print(f"Error parsing manifest for {tool_folder.name}: {e}")
+            print(f"Error parsing manifest for {tool_id}: {e}")
             continue
             
-        tool_id = manifest.get("id") or tool_folder.name
+        tool_id = manifest.get("id") or tool_id
         version = manifest.get("version", "1.0.0")
         
         # Package ZIP file
@@ -66,7 +78,6 @@ def package_tools():
             for root, _, files in os.walk(tool_folder):
                 for file in files:
                     file_path = Path(root) / file
-                    # Save relative to tool_folder
                     rel_path = file_path.relative_to(tool_folder)
                     zf.write(file_path, rel_path)
                     
@@ -74,7 +85,6 @@ def package_tools():
         sha256 = compute_sha256(zip_path)
         
         # Build registry entry
-        # Raw icon URL: https://raw.githubusercontent.com/{repo}/{branch}/tools/{tool_id}/{icon_filename}
         icon_filename = manifest.get("icon")
         icon_url = ""
         if icon_filename:
@@ -94,18 +104,20 @@ def package_tools():
             "dependencies": manifest.get("dependencies", {}),
             "icon": icon_url,
             "downloadUrl": f"https://github.com/{repo}/releases/download/{tool_id}-{version}/{zip_filename}",
-            "sha256": sha256
+            "sha255": sha256 # maintain schema field compatibility (sha256)
         }
+        # Backward-compatibility alias
+        tool_entry["sha256"] = sha256
         
         registry["tools"][tool_id] = tool_entry
         released_list.append(f"{tool_id},{version},{zip_path.relative_to(root_dir)}")
         
-    # Write updated index.json
+    # Write registry back
     with open(index_json_path, "w", encoding="utf-8") as f:
         json.dump(registry, f, indent=2, ensure_ascii=False)
     print(f"Updated index.json successfully.")
     
-    # Save list of released tools for the GitHub action runner
+    # Save list of released tools
     with open(dist_dir / "release_packages.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(released_list))
     print(f"Wrote release packages list to dist_tools/release_packages.txt")
