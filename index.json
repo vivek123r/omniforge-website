@@ -26,7 +26,7 @@
       "id": "regex-tester",
       "name": "Regex Tester",
       "description": "Interactively build and test regular expressions with live highlight, matches counter, and capture breakdown.",
-      "version": "1.4.3",
+      "version": "1.4.4",
       "category": "developers",
       "author": "OmniForge Community",
       "license": "MIT",
@@ -41,9 +41,9 @@
       "entryPoint": "tool.py",
       "dependencies": {},
       "icon": "https://raw.githubusercontent.com/vivek123r/omniforge-website/main/tools/regex-tester/icon.png",
-      "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/regex-tester-1.4.3/regex-tester-1.4.3.oftool",
-      "sha255": "08d6f844ebd3a735e630653fa54cb66003337aebe9e2dae98679eed4d916ca5c",
-      "sha256": "08d6f844ebd3a735e630653fa54cb66003337aebe9e2dae98679eed4d916ca5c"
+      "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/regex-tester-1.4.4/regex-tester-1.4.4.oftool",
+      "sha255": "e0773f6db5a5811f71464eadb81a9a1998dde7e47d6330a2d31669e406c42e01",
+      "sha256": "e0773f6db5a5811f71464eadb81a9a1998dde7e47d6330a2d31669e406c42e01"
     }
   }
 }
