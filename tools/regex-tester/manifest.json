@@ -2,7 +2,7 @@
   "id": "regex-tester",
   "name": "Regex Tester",
   "description": "Interactively build and test regular expressions with live highlight, matches counter, and capture breakdown.",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "category": "developers",
   "author": "OmniForge Community",
   "license": "MIT",
