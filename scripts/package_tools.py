@@ -119,7 +119,8 @@ def package_tools():
     
     # Save list of released tools
     with open(dist_dir / "release_packages.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(released_list))
+        if released_list:
+            f.write("\n".join(released_list) + "\n")
     print(f"Wrote release packages list to dist_tools/release_packages.txt")
 
 if __name__ == "__main__":

@@ -63,7 +63,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -f dist_tools/release_packages.txt ]; then
-            while IFS=, read -r tool_id version zip_path; do
+            while IFS=, read -r tool_id version zip_path || [ -n "$tool_id" ]; do
               # Ensure line is not empty
               [ -z "$tool_id" ] && continue
               echo "Creating release for ${tool_id} v${version}..."
