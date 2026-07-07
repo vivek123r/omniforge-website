@@ -70,11 +70,20 @@ jobs:
               echo "Creating release for ${tool_id} v${version}..."
               tag_name="${tool_id}-${version}"
               # Create release or overwrite existing asset using gh cli
-              gh release create "$tag_name" "$zip_path" \
+              if ! gh release create "$tag_name" "$zip_path" \
                 -R "$GITHUB_REPOSITORY" \
                 --title "${tool_id} v${version}" \
                 --notes "OmniForge community tool package for ${tool_id}." \
-                --clobber
+                --clobber > release_error.log 2>&1; then
+                echo "Release creation failed for $tag_name. Log:"
+                cat release_error.log
+                git config --global user.name "github-actions[bot]"
+                git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                git add release_error.log
+                git commit -m "chore: log release error for $tag_name [skip ci]" || true
+                git push origin HEAD:${{ github.ref_name }} || true
+                exit 1
+              fi
             done < dist_tools/release_packages.txt
           else
             echo "No packages list found to release."
