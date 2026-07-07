@@ -20,7 +20,7 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/qr-generator-1.2.0/qr-generator-1.2.0.oftool",
-      "sha256": "8693a375ed1662349ce5932b8d0b515b44b7c2e9abcb4d403dae113bb2ee783f"
+      "sha256": "b86c8e455bac8f6a2ac2f6c844f401038f2385c5ef40b69169b78bc899e64846"
     },
     "regex-tester": {
       "id": "regex-tester",
@@ -42,7 +42,7 @@
       "dependencies": {},
       "icon": "https://raw.githubusercontent.com/vivek123r/omniforge-website/main/tools/regex-tester/icon.png",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/regex-tester-1.4.0/regex-tester-1.4.0.oftool",
-      "sha256": "a5ccff6d9b6d4d985ad44253a99fc1278e83fc9b856e06e5b2ca77c1476dc813"
+      "sha256": "263f0f8b59f4516c028bcc33d0faff8cafc6b393f95eb74c6f867c2e6b1accea"
     }
   }
 }
