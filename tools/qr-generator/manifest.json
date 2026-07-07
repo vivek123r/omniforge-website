@@ -2,7 +2,7 @@
   "id": "qr-generator",
   "name": "QR Code Generator",
   "description": "Generate customized QR codes for URLs, text, Wi-Fi setups, or contact cards with high error tolerance.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "category": "utilities",
   "author": "OmniForge Community",
   "license": "Apache-2.0",
