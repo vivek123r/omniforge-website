@@ -340,8 +340,8 @@ async function fetchRegistry() {
     }));
   }
   
-  // Unify lists
-  toolsList = [...BUILTIN_MODULES, ...downloadableTools];
+  // Unify lists (only show built-in core modules on the main landing page)
+  toolsList = [...BUILTIN_MODULES];
   renderTools();
 }
 
