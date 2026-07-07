@@ -4,7 +4,7 @@
       "id": "qr-generator",
       "name": "QR Code Generator",
       "description": "Generate customized QR codes for URLs, text, Wi-Fi setups, or contact cards with high error tolerance.",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "category": "utilities",
       "author": "OmniForge Community",
       "license": "Apache-2.0",
@@ -19,8 +19,9 @@
       "entryPoint": "tool.py",
       "dependencies": {},
       "icon": "",
-      "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/qr-generator-1.2.0/qr-generator-1.2.0.oftool",
-      "sha256": "b86c8e455bac8f6a2ac2f6c844f401038f2385c5ef40b69169b78bc899e64846"
+      "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/qr-generator-1.2.1/qr-generator-1.2.1.oftool",
+      "sha255": "54a17676016b82113b8f098d4e59daadd48d3e181f22f4b67f2c375901f7a24e",
+      "sha256": "54a17676016b82113b8f098d4e59daadd48d3e181f22f4b67f2c375901f7a24e"
     },
     "regex-tester": {
       "id": "regex-tester",
