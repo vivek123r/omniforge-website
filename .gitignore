@@ -18,3 +18,4 @@ Thumbs.db
 
 # large binaries
 public/downloads/OmniForge-Studio-Setup.exe
+dist_tools/

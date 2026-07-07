@@ -1,0 +1,13 @@
+{
+  "id": "regex-tester",
+  "name": "Regex Tester",
+  "description": "Build and test regular expressions interactively with live highlight, matches counter, and capture breakdown.",
+  "version": "1.4.0",
+  "category": "developers",
+  "author": "OmniForge Community",
+  "license": "MIT",
+  "tags": ["regex", "tester", "text", "match", "developer"],
+  "minAppVersion": "0.1.0",
+  "entryPoint": "tool.py",
+  "icon": "icon.png"
+}

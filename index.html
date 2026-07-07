@@ -29,7 +29,7 @@
       </a>
       <nav class="desktop-nav" aria-label="Primary navigation">
         <a href="#features">Features</a>
-        <a href="#modules">Modules</a>
+        <a href="#modules">Tools</a>
         <a href="#extensions">Extensions</a>
         <a href="#privacy">Privacy</a>
         <a href="#download">Install</a>
@@ -155,32 +155,48 @@
       <section id="modules" class="modules-section reveal">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Built to replace dozens</p>
-            <h2>16 Modules.<br />Infinite Possibilities.</h2>
+            <p class="eyebrow">Workstation Directory</p>
+            <h2>Tools & Modules</h2>
           </div>
           <p>
-            From documents to media, conversion to automation - every file path
-            has a tool waiting inside one native Windows workspace.
+            Search built-in modules or browse the public registry to install community tools.
+            Find a tool, view details, and download or install it directly.
           </p>
         </div>
 
-        <div class="module-grid">
-          <button class="module-tile"><span>▤</span>Documents</button>
-          <button class="module-tile"><span>⌁</span>PDF Studio</button>
-          <button class="module-tile"><span>▧</span>Image Studio</button>
-          <button class="module-tile"><span>▷</span>Video Studio</button>
-          <button class="module-tile"><span>♪</span>Audio Studio</button>
-          <button class="module-tile"><span>⇄</span>Conversion</button>
-          <button class="module-tile"><span>▣</span>Archives</button>
-          <button class="module-tile"><span>◉</span>Versioning</button>
-          <button class="module-tile"><span>◫</span>Capture</button>
-          <button class="module-tile"><span>○</span>Recorder</button>
-          <button class="module-tile"><span>↓</span>Downloads</button>
-          <button class="module-tile"><span>✣</span>Toolbox</button>
-          <button class="module-tile"><span>⌕</span>Search</button>
-          <button class="module-tile"><span>⚙</span>Projects</button>
-          <button class="module-tile"><span>⌘</span>Automation</button>
-          <button class="module-tile"><span>▰</span>Explorer</button>
+        <div class="toolbox-container">
+          <div class="toolbox-search-bar">
+            <div class="search-input-wrapper">
+              <span class="search-icon">⌕</span>
+              <input
+                type="text"
+                id="tool-search"
+                placeholder="Search tools & modules (e.g. 'regex', 'pdf', 'hash')..."
+                aria-label="Search tools and modules"
+              />
+              <button id="clear-search" style="display: none;" type="button">×</button>
+            </div>
+            <div class="toolbox-filters" role="tablist" aria-label="Tool Categories">
+              <button class="filter-btn active" data-category="all" role="tab" aria-selected="true">All Tools</button>
+              <button class="filter-btn" data-category="builtin" role="tab" aria-selected="false">Built-In</button>
+              <button class="filter-btn" data-category="downloadable" role="tab" aria-selected="false">Downloadable</button>
+              <button class="filter-btn" data-category="security" role="tab" aria-selected="false">Security</button>
+              <button class="filter-btn" data-category="utilities" role="tab" aria-selected="false">Utilities</button>
+              <button class="filter-btn" data-category="formatting" role="tab" aria-selected="false">Formatting</button>
+              <button class="filter-btn" data-category="media" role="tab" aria-selected="false">Media</button>
+              <button class="filter-btn" data-category="developers" role="tab" aria-selected="false">Developers</button>
+            </div>
+          </div>
+
+          <div class="tools-grid-wrapper">
+            <div id="tools-grid" class="tools-grid">
+              <!-- Dynamically populated via JS -->
+            </div>
+            <div id="tools-empty" class="tools-empty" style="display: none;">
+              <span>∅</span>
+              <p>No tools or modules match your search criteria. Try another search term or category.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -267,12 +283,59 @@
       </a>
       <nav aria-label="Footer navigation">
         <a href="#features">Features</a>
-        <a href="#modules">Modules</a>
+        <a href="#modules">Tools</a>
         <a href="#extensions">Extensions</a>
         <a href="#download">Install</a>
       </nav>
       <p>© 2026 OmniForge Studio. All rights reserved.</p>
     </footer>
+
+    <!-- Tool Details Modal -->
+    <div id="tool-modal" class="modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+      <div class="modal-card">
+        <button class="modal-close" aria-label="Close modal" type="button">×</button>
+        <div class="modal-header">
+          <div class="modal-icon-wrapper">
+            <span id="modal-icon-symbol" class="modal-icon-symbol">✣</span>
+            <img id="modal-icon-img" src="" alt="" style="display: none;" />
+          </div>
+          <div>
+            <h3 id="modal-title">Tool Name</h3>
+            <div class="modal-meta-strip">
+              <span id="modal-version">v1.0.0</span>
+              <span id="modal-author">by Author</span>
+              <span id="modal-category" class="category-badge">Category</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-body">
+          <p id="modal-description">Detailed description of the tool goes here...</p>
+          <div class="modal-tags" id="modal-tags">
+            <!-- Tags dynamically populated -->
+          </div>
+          
+          <div class="modal-specs">
+            <div class="spec-item"><strong>License:</strong> <span id="modal-license">MIT</span></div>
+            <div class="spec-item"><strong>Min OmniForge:</strong> <span id="modal-min-version">v0.1.0</span></div>
+            <div class="spec-item" id="modal-deps-container"><strong>Dependencies:</strong> <span id="modal-dependencies">None</span></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a id="modal-action-install" class="button button-dark" href="#">
+            <span>Install in App</span>
+            <span aria-hidden="true">↓</span>
+          </a>
+          <a id="modal-action-download" class="button button-light" href="#">
+            <span>Download .oftool</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a id="modal-action-source" class="button button-light" href="#" target="_blank" rel="noopener">
+            <span>View Source</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>

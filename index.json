@@ -1,0 +1,48 @@
+{
+  "tools": {
+    "qr-generator": {
+      "id": "qr-generator",
+      "name": "QR Code Generator",
+      "description": "Generate customized QR codes for URLs, text, Wi-Fi setups, or contact cards with high error tolerance.",
+      "version": "1.2.0",
+      "category": "utilities",
+      "author": "OmniForge Community",
+      "license": "Apache-2.0",
+      "tags": [
+        "qr",
+        "code",
+        "barcode",
+        "image",
+        "generator"
+      ],
+      "minAppVersion": "0.1.0",
+      "entryPoint": "tool.py",
+      "dependencies": {},
+      "icon": "",
+      "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/qr-generator-1.2.0/qr-generator-1.2.0.oftool",
+      "sha256": "8693a375ed1662349ce5932b8d0b515b44b7c2e9abcb4d403dae113bb2ee783f"
+    },
+    "regex-tester": {
+      "id": "regex-tester",
+      "name": "Regex Tester",
+      "description": "Build and test regular expressions interactively with live highlight, matches counter, and capture breakdown.",
+      "version": "1.4.0",
+      "category": "developers",
+      "author": "OmniForge Community",
+      "license": "MIT",
+      "tags": [
+        "regex",
+        "tester",
+        "text",
+        "match",
+        "developer"
+      ],
+      "minAppVersion": "0.1.0",
+      "entryPoint": "tool.py",
+      "dependencies": {},
+      "icon": "https://raw.githubusercontent.com/vivek123r/omniforge-website/main/tools/regex-tester/icon.png",
+      "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/regex-tester-1.4.0/regex-tester-1.4.0.oftool",
+      "sha256": "a5ccff6d9b6d4d985ad44253a99fc1278e83fc9b856e06e5b2ca77c1476dc813"
+    }
+  }
+}

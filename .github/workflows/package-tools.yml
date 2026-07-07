@@ -1,0 +1,59 @@
+name: Package and Release Tools
+
+on:
+  push:
+    paths:
+      - 'tools/**'
+      - 'scripts/**'
+      - '.github/workflows/package-tools.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-level: '3.10'
+
+      - name: Package Tools and Generate Registry
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          python scripts/package_tools.py
+
+      - name: Commit and Push registry index
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.json
+          git diff-index --quiet HEAD || git commit -m "chore: auto-update toolbox index.json [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Create Releases and Upload Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f dist_tools/release_packages.txt ]; then
+            while IFS=, read -r tool_id version zip_path; do
+              echo "Creating release for ${tool_id} v${version}..."
+              tag_name="${tool_id}-${version}"
+              # Create release or overwrite existing asset using gh cli
+              gh release create "$tag_name" "$zip_path" \
+                --title "${tool_id} v${version}" \
+                --notes "OmniForge community tool package for ${tool_id}." \
+                --clobber || echo "Release creation completed for $tag_name"
+            done < dist_tools/release_packages.txt
+          else
+            echo "No packages list found to release."
+          fi
