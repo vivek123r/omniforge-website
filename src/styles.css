@@ -737,61 +737,6 @@ h1 span {
   line-height: 1.6;
 }
 
-.module-grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(8, minmax(88px, 1fr));
-  gap: clamp(26px, 4vw, 60px) 24px;
-}
-
-.module-tile {
-  position: relative;
-  min-height: 104px;
-  border: 0;
-  background: transparent;
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 16px;
-  color: var(--ink);
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.module-tile::before {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0);
-  transform: scale(0.88);
-  transition: transform 190ms ease, border-color 190ms ease, background 190ms ease;
-}
-
-.module-tile:hover::before {
-  transform: scale(1);
-  border-color: var(--ink);
-  background: rgba(255, 255, 255, 0.58);
-}
-
-.module-tile span {
-  position: relative;
-  z-index: 1;
-  font-size: 34px;
-  line-height: 1;
-  transition: transform 220ms cubic-bezier(.2, .8, .2, 1);
-}
-
-.module-tile:hover span {
-  transform: translateY(-8px) rotate(-5deg);
-}
-
-.module-tile {
-  font-weight: 500;
-}
-
 .install-section {
   position: relative;
   display: grid;
@@ -1122,10 +1067,6 @@ h1 span {
     min-height: 560px;
   }
 
-  .module-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
   .install-section {
     grid-template-columns: 1fr;
   }
@@ -1186,17 +1127,22 @@ h1 span {
   }
 
   .hero-stage {
-    min-height: 480px;
+    min-height: 0;
     width: 100%;
     overflow: hidden;
   }
 
   .app-window {
     grid-template-columns: 46px 1fr;
-    min-height: 440px;
+    min-height: 0;
     border-radius: 14px;
     width: 100%;
     max-width: calc(100vw - 36px);
+  }
+
+  .app-window[data-tilt] {
+    transform: none !important;
+    box-shadow: none !important;
   }
 
   .app-content {
@@ -1219,10 +1165,6 @@ h1 span {
     grid-column: auto;
   }
 
-  .module-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .install-section {
     margin: 0;
     padding: 34px 18px;
@@ -1233,6 +1175,12 @@ h1 span {
 
   .install-card {
     padding: 26px 18px;
+    min-height: 0;
+  }
+
+  .install-card[data-tilt] {
+    transform: none !important;
+    box-shadow: none !important;
   }
 
   .vertical-label {

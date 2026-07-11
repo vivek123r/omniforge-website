@@ -58,32 +58,34 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   });
 });
 
-document.querySelectorAll("[data-tilt]").forEach((card) => {
-  let frame = 0;
+if (!window.matchMedia("(pointer: coarse)").matches) {
+  document.querySelectorAll("[data-tilt]").forEach((card) => {
+    let frame = 0;
 
-  const reset = () => {
-    card.style.transform = "";
-    card.style.boxShadow = "";
-  };
+    const reset = () => {
+      card.style.transform = "";
+      card.style.boxShadow = "";
+    };
 
-  card.addEventListener("pointermove", (event) => {
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => {
-      const rect = card.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width - 0.5;
-      const y = (event.clientY - rect.top) / rect.height - 0.5;
-      const rotateX = y * -10;
-      const rotateY = x * 13;
-      const lift = card.classList.contains("app-window") ? 14 : 8;
+    card.addEventListener("pointermove", (event) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        const rotateX = y * -10;
+        const rotateY = x * 13;
+        const lift = card.classList.contains("app-window") ? 14 : 8;
 
-      card.style.transform = `translateY(-${lift}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-      card.style.boxShadow = `${x * -28}px ${40 + y * 20}px 90px rgba(0, 0, 0, 0.18)`;
+        card.style.transform = `translateY(-${lift}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        card.style.boxShadow = `${x * -28}px ${40 + y * 20}px 90px rgba(0, 0, 0, 0.18)`;
+      });
     });
-  });
 
-  card.addEventListener("pointerleave", reset);
-  card.addEventListener("blur", reset);
-});
+    card.addEventListener("pointerleave", reset);
+    card.addEventListener("blur", reset);
+  });
+}
 
 document.querySelectorAll(".magnetic").forEach((element) => {
   element.addEventListener("pointermove", (event) => {
@@ -115,11 +117,6 @@ document.querySelectorAll(".reveal").forEach((element) => {
   if (element.getBoundingClientRect().top < window.innerHeight * 0.95) {
     element.classList.add("visible");
   }
-});
-
-const moduleTiles = document.querySelectorAll(".module-tile");
-moduleTiles.forEach((tile, index) => {
-  tile.style.transitionDelay = `${Math.min(index * 18, 220)}ms`;
 });
 
 const quickButtons = document.querySelectorAll(".quick-grid button");
@@ -176,7 +173,10 @@ const BUILTIN_MODULES = [
   { id: "search", name: "Search", description: "Fast index-based disk search, duplicates finder, and space analyzer.", category: "utilities", isBuiltin: true, iconSymbol: "⌕", tags: ["search", "disk", "space", "duplicate", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
   { id: "projects", name: "Projects", description: "Group file paths, assets, actions, and notes into structured client workspaces.", category: "utilities", isBuiltin: true, iconSymbol: "⚙", tags: ["project", "workspace", "organizer", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
   { id: "automation", name: "Automation", description: "Visual task designer, folder watcher, and automated script scheduler.", category: "developers", isBuiltin: true, iconSymbol: "⌘", tags: ["automate", "workflow", "trigger", "script", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
-  { id: "explorer", name: "Explorer", description: "Local folder browser with built-in previews and custom tag manager.", category: "utilities", isBuiltin: true, iconSymbol: "▰", tags: ["files", "explorer", "preview", "tags", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" }
+  { id: "explorer", name: "Explorer", description: "Local folder browser with built-in previews and custom tag manager.", category: "utilities", isBuiltin: true, iconSymbol: "▰", tags: ["files", "explorer", "preview", "tags", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
+  { id: "dashboard", name: "Dashboard", description: "Home screen with quick actions, recent files, storage overview, and active tasks.", category: "utilities", isBuiltin: true, iconSymbol: "▣", tags: ["home", "dashboard", "quick-actions", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
+  { id: "settings", name: "Settings", description: "Configure themes, keyboard shortcuts, startup behavior, downloads, and automation.", category: "utilities", isBuiltin: true, iconSymbol: "⚙", tags: ["settings", "configure", "preferences", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
+  { id: "terminal", name: "Terminal", description: "Multi-pane PTY terminal with voice input, auto-listen, and auto-submit modes.", category: "developers", isBuiltin: true, iconSymbol: "⚡", tags: ["terminal", "pty", "shell", "voice", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" }
 ];
 
 const FALLBACK_DOWNLOADABLE_TOOLS = [
@@ -588,16 +588,6 @@ filterButtons.forEach(button => {
     renderTools();
   });
 });
-
-// Intercept clicks on the static Toolbox tile under modules list
-const toolboxTile = Array.from(document.querySelectorAll(".module-tile")).find(tile => tile.textContent.includes("Toolbox"));
-if (toolboxTile) {
-  toolboxTile.addEventListener("click", (e) => {
-    e.preventDefault();
-    const targetSection = document.getElementById("toolbox");
-    targetSection?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-}
 
 // Initialize registry
 fetchRegistry();
