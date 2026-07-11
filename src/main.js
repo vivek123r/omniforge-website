@@ -58,7 +58,7 @@ document.querySelectorAll("[data-scroll]").forEach((button) => {
   });
 });
 
-if (!window.matchMedia("(pointer: coarse)").matches) {
+if (!window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
   document.querySelectorAll("[data-tilt]").forEach((card) => {
     let frame = 0;
 
@@ -174,8 +174,8 @@ const BUILTIN_MODULES = [
   { id: "projects", name: "Projects", description: "Group file paths, assets, actions, and notes into structured client workspaces.", category: "utilities", isBuiltin: true, iconSymbol: "⚙", tags: ["project", "workspace", "organizer", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
   { id: "automation", name: "Automation", description: "Visual task designer, folder watcher, and automated script scheduler.", category: "developers", isBuiltin: true, iconSymbol: "⌘", tags: ["automate", "workflow", "trigger", "script", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
   { id: "explorer", name: "Explorer", description: "Local folder browser with built-in previews and custom tag manager.", category: "utilities", isBuiltin: true, iconSymbol: "▰", tags: ["files", "explorer", "preview", "tags", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
-  { id: "dashboard", name: "Dashboard", description: "Home screen with quick actions, recent files, storage overview, and active tasks.", category: "utilities", isBuiltin: true, iconSymbol: "▣", tags: ["home", "dashboard", "quick-actions", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
-  { id: "settings", name: "Settings", description: "Configure themes, keyboard shortcuts, startup behavior, downloads, and automation.", category: "utilities", isBuiltin: true, iconSymbol: "⚙", tags: ["settings", "configure", "preferences", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
+  { id: "dashboard", name: "Dashboard", description: "Home screen with quick actions, recent files, storage overview, and active tasks.", category: "utilities", isBuiltin: true, iconSymbol: "⬡", tags: ["home", "dashboard", "quick-actions", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
+  { id: "settings", name: "Settings", description: "Configure themes, keyboard shortcuts, startup behavior, downloads, and automation.", category: "utilities", isBuiltin: true, iconSymbol: "⌨", tags: ["settings", "configure", "preferences", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" },
   { id: "terminal", name: "Terminal", description: "Multi-pane PTY terminal with voice input, auto-listen, and auto-submit modes.", category: "developers", isBuiltin: true, iconSymbol: "⚡", tags: ["terminal", "pty", "shell", "voice", "core"], author: "OmniForge", license: "Core", minAppVersion: "0.1.0", dependencies: "None (Core)", sourceUrl: "#" }
 ];
 
@@ -340,8 +340,8 @@ async function fetchRegistry() {
     }));
   }
   
-  // Unify lists (only show built-in core modules on the main landing page)
-  toolsList = [...BUILTIN_MODULES];
+  // Unify lists — built-in modules + downloadable community tools
+  toolsList = [...BUILTIN_MODULES, ...downloadableTools];
   renderTools();
 }
 

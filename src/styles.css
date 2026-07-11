@@ -104,6 +104,12 @@ body.pointer-active .cursor-spot {
   opacity: 1;
 }
 
+@media (pointer: coarse) {
+  .cursor-spot {
+    display: none !important;
+  }
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -1684,5 +1690,9 @@ h1 span {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 1ms !important;
+  }
+
+  .marquee div {
+    animation: none !important;
   }
 }
