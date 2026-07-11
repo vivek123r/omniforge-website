@@ -103,7 +103,7 @@ def package_tools():
             "entryPoint": manifest.get("entryPoint", "tool.py"),
             "dependencies": manifest.get("dependencies", {}),
             "icon": icon_url,
-            "downloadUrl": f"https://github.com/{repo}/releases/download/{tool_id}-{version}/{zip_filename}",
+            "downloadUrl": f"https://github.com/{repo}/releases/download/latest-tools/{zip_filename}",
             "sha255": sha256 # maintain schema field compatibility (sha256)
         }
         # Backward-compatibility alias
