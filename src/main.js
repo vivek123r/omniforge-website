@@ -297,6 +297,7 @@ const FALLBACK_DOWNLOADABLE_TOOLS = [
 let toolsList = [];
 let activeCategory = "all";
 let searchQuery = "";
+let showAllTools = false;
 
 async function fetchRegistry() {
   let downloadableTools = [];
@@ -383,7 +384,10 @@ function renderTools() {
     toolsGrid.style.display = "grid";
     if (toolsEmpty) toolsEmpty.style.display = "none";
 
-    filtered.forEach((tool, index) => {
+    const limit = showAllTools ? filtered.length : 6;
+    const visible = filtered.slice(0, limit);
+
+    visible.forEach((tool, index) => {
       const card = document.createElement("article");
       card.className = "tool-card reveal";
       card.setAttribute("tabindex", "0");
@@ -425,6 +429,17 @@ function renderTools() {
 
       toolsGrid.appendChild(card);
     });
+
+    if (filtered.length > 6 && !showAllTools) {
+      const showMore = document.createElement("button");
+      showMore.className = "show-more-btn";
+      showMore.textContent = `Show all ${filtered.length} tools`;
+      showMore.addEventListener("click", () => {
+        showAllTools = true;
+        renderTools();
+      });
+      toolsGrid.appendChild(showMore);
+    }
   }
 }
 
@@ -557,6 +572,7 @@ const clearSearchBtn = document.getElementById("clear-search");
 if (toolSearch) {
   toolSearch.addEventListener("input", (e) => {
     searchQuery = e.target.value;
+    showAllTools = false;
     if (clearSearchBtn) {
       clearSearchBtn.style.display = searchQuery ? "block" : "none";
     }
@@ -568,6 +584,7 @@ if (clearSearchBtn && toolSearch) {
   clearSearchBtn.addEventListener("click", () => {
     toolSearch.value = "";
     searchQuery = "";
+    showAllTools = false;
     clearSearchBtn.style.display = "none";
     toolSearch.focus();
     renderTools();
@@ -585,6 +602,7 @@ filterButtons.forEach(button => {
     button.classList.add("active");
     button.setAttribute("aria-selected", "true");
     activeCategory = button.dataset.category;
+    showAllTools = false;
     renderTools();
   });
 });
