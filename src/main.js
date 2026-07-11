@@ -1,5 +1,5 @@
 const WINDOWS_INSTALLER_URL =
-  import.meta.env.VITE_WINDOWS_INSTALLER_URL || "https://github.com/vivek123r/omniforge-website/releases/latest/download/OmniForge-Studio-Setup.exe";
+  import.meta.env.VITE_WINDOWS_INSTALLER_URL || "/downloads/OmniForge-Studio-Setup.exe";
 const EXTENSION_ZIP_URL =
   import.meta.env.VITE_EXTENSION_ZIP_URL || "/downloads/omniforge-browser-bridge.zip";
 
@@ -38,11 +38,11 @@ document.querySelectorAll("[data-download='windows']").forEach((link) => {
       const response = await fetch(WINDOWS_INSTALLER_URL, { method: "HEAD" });
       if (!response.ok) {
         event.preventDefault();
-        showToast("Windows installer is not uploaded yet. Add it to website/public/downloads or set VITE_WINDOWS_INSTALLER_URL.");
+        showToast("Installer not available yet — coming soon with the first public release.");
       }
     } catch {
       event.preventDefault();
-      showToast("Windows installer is not reachable yet. Add it to downloads or set VITE_WINDOWS_INSTALLER_URL.");
+      showToast("Installer not available yet — coming soon with the first public release.");
     }
   });
 });
