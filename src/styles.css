@@ -1374,6 +1374,49 @@ h1 span {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
   }
+
+  .tool-card {
+    min-height: 160px;
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+
+  .tool-card-top {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tool-card-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+
+  .tool-card-icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .tool-card-meta h4 {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .tool-card-description {
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 0 0 10px 0;
+  }
+
+  .tool-card-footer {
+    padding-top: 8px;
+  }
+
+  .category-badge {
+    font-size: 8px;
+    padding: 2px 6px;
+  }
 }
 
 /* --- Toolbox Registry Section --- */
