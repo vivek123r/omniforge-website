@@ -20,8 +20,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/qr-generator-1.2.1.oftool",
-      "sha255": "445f07483e6bfc5b095ec883bca5ede8f41028189badc1b38c83412db42a01f5",
-      "sha256": "445f07483e6bfc5b095ec883bca5ede8f41028189badc1b38c83412db42a01f5"
+      "sha255": "c8f209b604d98b78154748a10a9e011060345529b7974e97cccd4e9fc815515c",
+      "sha256": "c8f209b604d98b78154748a10a9e011060345529b7974e97cccd4e9fc815515c"
     },
     "regex-tester": {
       "id": "regex-tester",
@@ -43,8 +43,8 @@
       "dependencies": {},
       "icon": "https://raw.githubusercontent.com/vivek123r/omniforge-website/main/tools/regex-tester/icon.png",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/regex-tester-1.4.4.oftool",
-      "sha255": "6da915877cc1f7f4a342cfa8008d72c2789f6c3143b2ba6a8aaec17b4f0d994a",
-      "sha256": "6da915877cc1f7f4a342cfa8008d72c2789f6c3143b2ba6a8aaec17b4f0d994a"
+      "sha255": "9002cc6a7f70d004a2ca4001ca0529a454d4d5b15a051664bce7ad9f4a3e38c6",
+      "sha256": "9002cc6a7f70d004a2ca4001ca0529a454d4d5b15a051664bce7ad9f4a3e38c6"
     },
     "json-formatter": {
       "id": "json-formatter",
@@ -65,8 +65,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/json-formatter-1.0.0.oftool",
-      "sha255": "ac5613f3b40cb17b73b65306f14174343a34b0bf2c6c32d73fd4262f3c9243af",
-      "sha256": "ac5613f3b40cb17b73b65306f14174343a34b0bf2c6c32d73fd4262f3c9243af"
+      "sha255": "9a0596319bfb623d411977f8047c8669d824c6dc23da70e34c3baa28ed75abab",
+      "sha256": "9a0596319bfb623d411977f8047c8669d824c6dc23da70e34c3baa28ed75abab"
     },
     "base64-converter": {
       "id": "base64-converter",
@@ -87,8 +87,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/base64-converter-1.0.0.oftool",
-      "sha255": "bdad1097daacfbd60f2b34a03980794d3151d4d17e990949a1e8567830650417",
-      "sha256": "bdad1097daacfbd60f2b34a03980794d3151d4d17e990949a1e8567830650417"
+      "sha255": "56e68cd892757c0a5fe45748270ac0765b747d48ab69251b4da7a4f7d00302d0",
+      "sha256": "56e68cd892757c0a5fe45748270ac0765b747d48ab69251b4da7a4f7d00302d0"
     },
     "hash-generator": {
       "id": "hash-generator",
@@ -109,8 +109,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/hash-generator-1.0.0.oftool",
-      "sha255": "01ea65ef82810483ffe9ad74780fc0f86f2f83ab9d6852e1f1f765be8ced23b8",
-      "sha256": "01ea65ef82810483ffe9ad74780fc0f86f2f83ab9d6852e1f1f765be8ced23b8"
+      "sha255": "8d78889eafb759f21e6dc9b31aac923a3c2be08198db35fe361d36415a335733",
+      "sha256": "8d78889eafb759f21e6dc9b31aac923a3c2be08198db35fe361d36415a335733"
     },
     "timestamp-converter": {
       "id": "timestamp-converter",
@@ -131,8 +131,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/timestamp-converter-1.0.0.oftool",
-      "sha255": "048c0b9471a3a04eba3f1c2099dcd2c74fb50544c43e416cf5ce8864239d4f23",
-      "sha256": "048c0b9471a3a04eba3f1c2099dcd2c74fb50544c43e416cf5ce8864239d4f23"
+      "sha255": "68aab48b9a25115fc9a7a22b451af14e0c1a1ed1835cc8e1addf51d914039055",
+      "sha256": "68aab48b9a25115fc9a7a22b451af14e0c1a1ed1835cc8e1addf51d914039055"
     },
     "uuid-generator": {
       "id": "uuid-generator",
@@ -153,8 +153,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/uuid-generator-1.0.0.oftool",
-      "sha255": "b3e2a2535873d4378a09e71d76e2ebc358facb93641d19ca07431370e0f74f0e",
-      "sha256": "b3e2a2535873d4378a09e71d76e2ebc358facb93641d19ca07431370e0f74f0e"
+      "sha255": "0e060695e95fbd4bbd18d76534b64333f9f4dc6720d300886c976118648cc4a4",
+      "sha256": "0e060695e95fbd4bbd18d76534b64333f9f4dc6720d300886c976118648cc4a4"
     },
     "text-diff": {
       "id": "text-diff",
@@ -175,8 +175,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/text-diff-1.0.0.oftool",
-      "sha255": "fa87e44b026036f7e90cd6542174e7406c838db3207c2cad9893404ffcf99514",
-      "sha256": "fa87e44b026036f7e90cd6542174e7406c838db3207c2cad9893404ffcf99514"
+      "sha255": "f9dbc35638b0a8c2aea510d8688431a749dca9ce10079169b74a2d6260b96cf6",
+      "sha256": "f9dbc35638b0a8c2aea510d8688431a749dca9ce10079169b74a2d6260b96cf6"
     },
     "color-converter": {
       "id": "color-converter",
@@ -198,8 +198,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/color-converter-1.0.0.oftool",
-      "sha255": "7226630bbaedba29a5a17384b7bdd8883b9e90cbe3faf734f294f0d8cdb10f82",
-      "sha256": "7226630bbaedba29a5a17384b7bdd8883b9e90cbe3faf734f294f0d8cdb10f82"
+      "sha255": "40b8e5c692d63ac1316147f703d1a175ef0fc587833d1a84b383bbc80c9595c2",
+      "sha256": "40b8e5c692d63ac1316147f703d1a175ef0fc587833d1a84b383bbc80c9595c2"
     },
     "unit-converter": {
       "id": "unit-converter",
@@ -220,8 +220,8 @@
       "dependencies": {},
       "icon": "",
       "downloadUrl": "https://github.com/vivek123r/omniforge-website/releases/download/latest-tools/unit-converter-1.0.0.oftool",
-      "sha255": "48cb02b2c12f28be1af35e8da0a3ff181e720ba5b869a236c275044f5ab68746",
-      "sha256": "48cb02b2c12f28be1af35e8da0a3ff181e720ba5b869a236c275044f5ab68746"
+      "sha255": "5c5fbec8762ba68416383556952d7d1ce6ebe46e111161d862c0b30bcb7a7b82",
+      "sha256": "5c5fbec8762ba68416383556952d7d1ce6ebe46e111161d862c0b30bcb7a7b82"
     }
   }
 }
