@@ -1,5 +1,5 @@
 const WINDOWS_INSTALLER_URL =
-  import.meta.env.VITE_WINDOWS_INSTALLER_URL || "https://github.com/vivek123r/omniforge-website/releases/download/v0.1.0/OmniForge-Studio-Setup.exe";
+  import.meta.env.VITE_WINDOWS_INSTALLER_URL || "https://github.com/vivek123r/omniforge-website/releases/latest/download/OmniForge-Studio-Setup.exe";
 const EXTENSION_ZIP_URL =
   import.meta.env.VITE_EXTENSION_ZIP_URL || "/downloads/omniforge-browser-bridge.zip";
 
