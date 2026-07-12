@@ -1255,13 +1255,37 @@ h1 span {
     padding: 36px 18px;
   }
 
-  .flow-step {
-    min-height: 100px;
-    padding: 18px;
+  .flow-line {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
-  .flow-line {
-    grid-template-columns: repeat(2, 1fr);
+  .flow-step {
+    min-height: 0 !important;
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    border-right: 1px solid var(--line) !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+
+  .flow-step:nth-child(2n) {
+    border-right: 0 !important;
+  }
+
+  .flow-step:nth-child(n+3) {
+    border-bottom: 0 !important;
+  }
+
+  .flow-step b {
+    font-size: 32px !important;
+    line-height: 1 !important;
+  }
+
+  .flow-step span {
+    position: static !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
   }
 
   .privacy-section {
