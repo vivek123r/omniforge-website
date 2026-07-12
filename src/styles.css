@@ -33,6 +33,7 @@ body {
 
 html {
   overflow-x: hidden;
+  zoom: 1.25;
 }
 
 a {
@@ -339,7 +340,8 @@ h1 span {
 .hero-stage {
   position: relative;
   display: grid;
-  place-items: center;
+  align-items: start;
+  justify-items: center;
   min-height: 620px;
   perspective: 1400px;
 }
@@ -434,24 +436,24 @@ h1 span {
 .app-content {
   position: relative;
   z-index: 1;
-  padding: 44px 34px 34px;
+  padding: 6px 18px 12px;
 }
 
 .app-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 8px;
 }
 
 .app-label {
   display: block;
-  margin-bottom: 12px;
-  font-size: 17px;
+  margin-bottom: 4px;
+  font-size: 11px;
 }
 
 .app-top strong {
-  font-size: 16px;
+  font-size: 13px;
 }
 
 .window-controls {
@@ -475,14 +477,14 @@ h1 span {
 }
 
 .quick-actions {
-  padding: 15px;
-  margin-bottom: 22px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
 }
 
 .quick-actions p,
 .panel-title {
-  margin: 0 0 12px;
-  font-size: 12px;
+  margin: 0 0 6px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -493,11 +495,11 @@ h1 span {
 }
 
 .quick-grid button {
-  min-height: 76px;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.68);
-  font-size: 10px;
+  font-size: 9px;
   cursor: pointer;
   transition: transform 180ms ease, border-color 180ms ease;
 }
@@ -509,18 +511,18 @@ h1 span {
 
 .quick-grid span {
   display: block;
-  margin-bottom: 10px;
-  font-size: 24px;
+  margin-bottom: 4px;
+  font-size: 16px;
 }
 
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1.25fr 0.9fr;
-  gap: 18px;
+  gap: 10px;
 }
 
 .panel {
-  padding: 18px;
+  padding: 12px;
 }
 
 .recent-panel {
@@ -1136,19 +1138,21 @@ h1 span {
     min-height: 0;
     width: 100%;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
   }
 
   .app-window {
-    grid-template-columns: 46px 1fr;
-    min-height: 0;
-    border-radius: 14px;
-    width: 100%;
-    max-width: calc(100vw - 36px);
+    flex-shrink: 0;
+    width: 780px;
+    zoom: 0.36;
+    border-radius: 20px;
+    pointer-events: none;
   }
 
   .app-window[data-tilt] {
     transform: none !important;
-    box-shadow: none !important;
+    box-shadow: 0 42px 88px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.9) !important;
   }
 
   .app-content {
@@ -1156,10 +1160,13 @@ h1 span {
   }
 
   .quick-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(70px, 1fr));
   }
 
-  .dashboard-grid,
+  .dashboard-grid {
+    grid-template-columns: 1.25fr 0.9fr;
+  }
+
   .storage-panel,
   .install-card,
   .flow-line,
@@ -1214,6 +1221,158 @@ h1 span {
     bottom: 20px;
     width: 48px;
     height: 48px;
+  }
+
+  /* ── Sections below hero ── */
+  .hero {
+    min-height: 0;
+    padding-bottom: 32px;
+  }
+
+  .modules-section {
+    padding: 36px 18px;
+  }
+
+  .section-head {
+    margin-bottom: 28px;
+    gap: 16px;
+  }
+
+  .section-head h2 {
+    font-size: 32px;
+  }
+
+  .section-head p:not(.eyebrow) {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .flow-section {
+    padding: 36px 18px;
+  }
+
+  .flow-step {
+    min-height: 100px;
+    padding: 18px;
+  }
+
+  .flow-line {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .privacy-section {
+    padding: 36px 18px;
+  }
+
+  .privacy-section h2 {
+    font-size: 32px;
+  }
+
+  .privacy-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .privacy-grid div {
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .privacy-grid span {
+    font-size: 18px;
+  }
+
+  .privacy-grid b {
+    font-size: 11px;
+    display: block;
+    margin: 4px 0 2px;
+  }
+
+  .privacy-grid p {
+    font-size: 10px;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  .install-section {
+    padding: 28px 18px;
+    margin: 0;
+    gap: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .install-card {
+    padding: 22px 18px;
+    min-height: 0;
+    gap: 18px;
+    grid-template-columns: 80px 1fr;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+
+  .install-card:last-child {
+    border-bottom: 0;
+  }
+
+  .product-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
+  }
+
+  .cube-icon span,
+  .puzzle-icon span {
+    width: 38px;
+    height: 38px;
+  }
+
+  .install-copy h3 {
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+
+  .install-copy p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .install-copy ul {
+    margin: 10px 0 14px;
+    font-size: 12px;
+  }
+
+  .install-copy li {
+    margin: 5px 0;
+  }
+
+  .button {
+    min-height: 40px;
+    font-size: 11px;
+    padding: 0 16px;
+    gap: 10px;
+  }
+
+  .site-footer {
+    grid-template-columns: 1fr;
+    padding: 24px 18px;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .site-footer nav {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .site-footer p {
+    justify-self: start;
+  }
+
+  /* Tools grid — 2 per row on mobile */
+  .tools-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 }
 
