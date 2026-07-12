@@ -30,25 +30,8 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "Workflow manually triggered. Packaging all tools..."
-            python scripts/package_tools.py
-          else
-            echo "Push triggered. Detecting changed tools..."
-            # Get unique directories under tools/ that have changes
-            changed_folders=$(git diff --name-only HEAD~1 | grep '^tools/' | cut -d/ -f2 | sort -u)
-            
-            if [ -z "$changed_folders" ]; then
-              echo "No files changed inside tools/ folder."
-              mkdir -p dist_tools
-              touch dist_tools/release_packages.txt
-            else
-              echo "Changes detected in: $changed_folders"
-              # Convert newline separated list to spaces
-              build_args=$(echo "$changed_folders" | tr '\n' ' ')
-              python scripts/package_tools.py $build_args
-            fi
-          fi
+          echo "Packaging all tools for the rolling release..."
+          python scripts/package_tools.py
 
       - name: Commit and Push registry index
         run: |
