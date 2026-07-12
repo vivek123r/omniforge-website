@@ -1342,20 +1342,15 @@ h1 span {
   }
 
   .desktop-desc {
-    display: none;
+    display: none !important;
   }
 
   .mobile-desc {
-    display: block;
+    display: block !important;
   }
 
   .install-copy ul {
-    margin: 10px 0 14px;
-    font-size: 12px;
-  }
-
-  .install-copy li {
-    margin: 5px 0;
+    display: none !important;
   }
 
   .button {
