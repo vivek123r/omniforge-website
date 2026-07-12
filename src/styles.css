@@ -781,6 +781,10 @@ h1 span {
   border-right: 0;
 }
 
+.mobile-desc {
+  display: none;
+}
+
 .product-icon {
   width: 138px;
   height: 138px;
@@ -1335,6 +1339,14 @@ h1 span {
   .install-copy p {
     font-size: 13px;
     line-height: 1.5;
+  }
+
+  .desktop-desc {
+    display: none;
+  }
+
+  .mobile-desc {
+    display: block;
   }
 
   .install-copy ul {
