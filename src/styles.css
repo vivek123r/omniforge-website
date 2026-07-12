@@ -1371,8 +1371,8 @@ h1 span {
 
   /* Tools grid — 2 per row on mobile */
   .tools-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
   }
 }
 
