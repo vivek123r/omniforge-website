@@ -1391,6 +1391,7 @@ h1 span {
     min-height: 160px;
     padding: 14px 12px;
     border-radius: 8px;
+    zoom: 0.75;
   }
 
   .tool-card-top {
