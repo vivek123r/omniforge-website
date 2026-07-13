@@ -1,5 +1,14 @@
 import { defineConfig } from 'vite'
+import { resolve } from 'path'
 
 export default defineConfig({
   base: '/omniforge-website/',
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        remote: resolve(__dirname, 'remote.html')
+      }
+    }
+  }
 })

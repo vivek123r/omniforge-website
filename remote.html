@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OmniForge Remote Control</title>
+  
+  <!-- PeerJS WebRTC, Xterm.js Console, Tailwind CSS and outfit font -->
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card: #121824;
+      --border: rgba(255,255,255,0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      padding: 0;
+      margin: 0;
+    }
+    
+    header {
+      background: rgba(18, 24, 36, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text);
+    }
+    
+    header h1 span {
+      color: var(--primary);
+      font-weight: 400;
+    }
+    
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .badge.connected {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+    
+    .badge.disconnected {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+    
+    .badge.connecting {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.2);
+      color: var(--warn);
+    }
+    
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 1.6fr 1fr;
+      }
+    }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.01);
+    }
+    
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .terminal-container {
+      height: 380px;
+      background: #020617;
+      padding: 12px;
+      position: relative;
+    }
+    
+    .no-sessions {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      background: #020617;
+      z-index: 10;
+    }
+    
+    .terminal-input-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,0.01);
+    }
+    
+    .terminal-input-bar input {
+      flex: 1;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    
+    .terminal-input-bar input:focus {
+      border-color: var(--primary);
+    }
+    
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.08);
+    }
+    
+    select {
+      background: #0b0f17;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      max-width: 160px;
+    }
+    
+    select option {
+      background: #121824;
+      color: var(--text);
+    }
+    
+    .macro-row {
+      display: flex;
+      gap: 6px;
+      padding: 10px 16px;
+      overflow-x: auto;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.1);
+    }
+    
+    .macro-btn {
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .macro-btn:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-color: rgba(255,255,255,0.15);
+    }
+    
+    .voice-control-panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      text-align: center;
+    }
+    
+    .mic-button {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.1);
+      border: 2px solid rgba(99, 102, 241, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    
+    .mic-button svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--primary);
+      transition: fill 0.3s;
+    }
+    
+    .mic-button::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.3s;
+    }
+    
+    .mic-button.recording {
+      background: var(--danger);
+      border-color: var(--danger);
+      animation: pulse 1.5s infinite;
+    }
+    
+    .mic-button.recording svg {
+      fill: #fff;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    
+    .status-text {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    
+    .transcription-preview {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.15);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      width: 100%;
+      min-height: 52px;
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .transcription-preview.active {
+      color: var(--text);
+      font-style: normal;
+      border-color: rgba(255,255,255,0.12);
+    }
+    
+    .mic-help-banner {
+      width: 100%;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      color: var(--warn);
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+    
+    .mic-help-banner:hover {
+      background: rgba(245, 158, 11, 0.12);
+    }
+    
+    .download-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 20px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    
+    .download-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .download-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .download-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    
+    .no-downloads {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    
+    /* Troubleshooting Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 15, 23, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: zoomIn 0.2s ease-out;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    
+    .modal-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    
+    .close-btn:hover {
+      color: var(--text);
+    }
+    
+    @keyframes zoomIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>OmniForge <span>Remote WebRTC Portal</span></h1>
+    <div id="status-badge" class="badge disconnected">Checking...</div>
+  </header>
+
+  <!-- Auth pairing screen / Connecting indicator -->
+  <section id="pairing-screen" class="flex flex-col items-center justify-center p-8 min-h-[80vh]">
+    <div class="w-full max-w-sm bg-[#121824] border border-white/10 p-6 rounded-xl text-center space-y-4 shadow-xl">
+      <div id="pairing-loading" class="flex flex-col items-center gap-3">
+        <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm font-semibold">Connecting to Desktop PC...</p>
+        <p class="text-xs text-slate-400">Verifying secure WebRTC link channel</p>
+      </div>
+      <div id="pairing-error" class="hidden space-y-4">
+        <div class="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center mx-auto text-xl font-bold">!</div>
+        <h2 class="text-md font-bold text-slate-200">Connection Failed</h2>
+        <p class="text-xs text-slate-400 leading-relaxed" id="error-message">The connection token could not be verified, or the desktop app is offline.</p>
+        <div class="text-[10px] text-slate-500 text-left bg-black/20 p-3 rounded-lg border border-white/5 space-y-1">
+          <strong class="text-slate-400 block font-sans">Common issues:</strong>
+          <ul class="list-disc pl-3.5 space-y-1 font-mono">
+            <li>Pairing code/token is expired or mismatch.</li>
+            <li>Browser closed or refreshed on the desktop app.</li>
+            <li>No network path (devices block WebRTC).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Dashboard -->
+  <main id="dashboard" style="display: none;">
+    <div class="dashboard-grid">
+      
+      <!-- Terminal Pane -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
+            Terminal Console
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <select id="terminal-select">
+              <option value="">No Active Terminals</option>
+            </select>
+            <button id="rename-terminal-btn" class="macro-btn" style="padding: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px;" title="Rename active terminal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="terminal-container" id="terminal-container">
+          <div id="no-terminal-placeholder" class="no-sessions">No active terminal session selected</div>
+          <div id="terminal" style="width: 100%; height: 100%;"></div>
+        </div>
+
+        <div class="terminal-input-bar">
+          <input type="text" id="cmd-input" placeholder="Type a command and press Enter..." autocomplete="off">
+          <button id="send-cmd-btn" class="btn" style="width: auto; padding: 0 20px;">Send</button>
+        </div>
+
+        <div class="macro-row">
+          <button class="macro-btn" data-cmd="dir">dir</button>
+          <button class="macro-btn" data-cmd="ls">ls</button>
+          <button class="macro-btn" data-cmd="git status">git status</button>
+          <button class="macro-btn" data-cmd="git diff">git diff</button>
+          <button class="macro-btn" data-cmd="python --version">python --version</button>
+          <button class="macro-btn" data-cmd="npm run dev">npm run dev</button>
+        </div>
+      </section>
+
+      <!-- Right Column Controls -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- Voice Control -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8"/></svg>
+              Voice Commands
+            </div>
+          </div>
+          <div class="voice-control-panel">
+            <button id="mic-btn" class="mic-button">
+              <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+            </button>
+            <div id="mic-status" class="status-text">Tap to speak a command</div>
+            <div id="transcription" class="transcription-preview">Transcription will appear here...</div>
+            <div id="mic-help-banner" class="mic-help-banner" style="display: none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span><strong>Mic Permission Alert:</strong> Click here for troubleshooting guide.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Live Downloads Widget -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Active Downloads
+            </div>
+          </div>
+          <div id="downloads-container" class="download-list">
+            <div class="no-downloads">No active downloads</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Microphone Troubleshooting Modal -->
+  <div id="mic-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Microphone Permissions Help</h2>
+        <button id="close-mic-modal" class="close-btn">&times;</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.9rem; line-height: 1.5; color: var(--text-muted);">
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 10px 12px; color: #fcd34d; font-size: 0.8rem; display: flex; align-items: start; gap: 6px;">
+          <span style="font-size: 1rem;">⚠️</span>
+          <span><strong>In-App Browser Warning:</strong> QR scanner built-in web views (WeChat, generic scanners) block mic access. Tap the menu in the top-right corner and select <strong>Open in Chrome</strong> or <strong>Open in Safari</strong>.</span>
+        </div>
+        <p>Browsers block mic access ('getUserMedia') on local network IPs over HTTP for security. Since this portal is hosted securely under HTTPS, you simply need to allow access when prompted. If it was blocked:</p>
+        
+        <div>
+          <strong style="color: var(--text); display: block; margin-bottom: 4px;">For Google Chrome (Android/Desktop):</strong>
+          <span>Click the padlock icon 🔒 in the URL address bar, find <strong>Microphone</strong>, and toggle it to <strong>Allow</strong>.</span>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 12px;">
+          <strong style="color: var(--text); display: block; margin-bottom: 4px;">For Apple Safari (iOS/iPhone):</strong>
+          <span>Open iOS Settings -> Safari -> Microphone, and ensure it is set to **Ask** or **Allow**. Then refresh the page.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Read parameters from URL query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const peerId = urlParams.get('peer');
+    const token = urlParams.get('token');
+    
+    let activeTerminalId = '';
+    let xterm = null;
+    let fitAddon = null;
+    let peer = null;
+    let conn = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+    const statusBadge = document.getElementById('status-badge');
+    const pairingScreen = document.getElementById('pairing-screen');
+    const dashboardScreen = document.getElementById('dashboard');
+    const pairingLoading = document.getElementById('pairing-loading');
+    const pairingError = document.getElementById('pairing-error');
+    const errorMessage = document.getElementById('error-message');
+    
+    const termSelect = document.getElementById('terminal-select');
+    const termPlaceholder = document.getElementById('no-terminal-placeholder');
+    const termDiv = document.getElementById('terminal');
+    
+    const micBtn = document.getElementById('mic-btn');
+    const micStatus = document.getElementById('mic-status');
+    const transcriptionDiv = document.getElementById('transcription');
+    const micHelpBanner = document.getElementById('mic-help-banner');
+
+    function showError(msg) {
+      pairingLoading.classList.add('hidden');
+      pairingError.classList.remove('hidden');
+      errorMessage.textContent = msg;
+      statusBadge.textContent = 'Disconnected';
+      statusBadge.className = 'badge disconnected';
+    }
+
+    if (!peerId || !token) {
+      showError('Missing parameters. This page must be launched by scanning the QR code inside the OmniForge Studio desktop app.');
+    } else {
+      initWebRTC();
+    }
+
+    function initWebRTC() {
+      statusBadge.textContent = 'Connecting...';
+      statusBadge.className = 'badge connecting';
+
+      // Connect to the public PeerJS cloud signaling server
+      peer = new Peer();
+
+      peer.on('open', (id) => {
+        console.log('My PeerJS ID is:', id);
+        
+        // Connect to the Desktop PC Peer ID
+        conn = peer.connect(peerId);
+        
+        conn.on('open', () => {
+          console.log('Data channel open to PC. Authenticating...');
+          // Submit token for validation
+          conn.send({ type: 'auth', token: token });
+        });
+
+        conn.on('data', (msg) => {
+          handleIncomingMessage(msg);
+        });
+
+        conn.on('close', () => {
+          console.log('Connection closed by PC.');
+          showError('Connection was terminated by the desktop application.');
+          dashboardScreen.style.display = 'none';
+          pairingScreen.style.display = 'flex';
+        });
+
+        conn.on('error', (err) => {
+          console.error('Data channel error:', err);
+          showError('WebRTC data channel error: ' + err.message);
+        });
+      });
+
+      peer.on('error', (err) => {
+        console.error('PeerJS error:', err);
+        showError('Broker network error: ' + err.message);
+      });
+    }
+
+    function handleIncomingMessage(msg) {
+      if (msg.type === 'auth_ok') {
+        console.log('Authenticated successfully!');
+        pairingScreen.style.display = 'none';
+        dashboardScreen.style.display = 'block';
+        statusBadge.textContent = 'Connected (P2P)';
+        statusBadge.className = 'badge connected';
+        
+        // Request initial status
+        conn.send({ type: 'get_status' });
+      } 
+      else if (msg.type === 'auth_err') {
+        showError('Pairing code validation failed: ' + (msg.error || 'Invalid token'));
+        conn.close();
+      }
+      else if (msg.type === 'status_update') {
+        updateActiveTerminals(msg.terminals || []);
+        updateDownloads(msg.downloads || []);
+      }
+      else if (msg.type === 'terminal_data') {
+        if (msg.ptyId === activeTerminalId && xterm) {
+          xterm.write(msg.data);
+        }
+      }
+      else if (msg.type === 'voice_result') {
+        if (msg.ok) {
+          transcriptionDiv.textContent = 'Executed: "' + msg.text + '"';
+        } else {
+          transcriptionDiv.textContent = 'Failed: ' + (msg.error || 'Could not transcribe');
+        }
+      }
+    }
+
+    // Terminals list synchronizer
+    function updateActiveTerminals(terminals) {
+      const currentVal = termSelect.value;
+      termSelect.innerHTML = '';
+
+      if (terminals.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No Active Terminals';
+        termSelect.appendChild(opt);
+        termPlaceholder.style.display = 'flex';
+        termDiv.style.visibility = 'hidden';
+        activeTerminalId = '';
+        return;
+      }
+
+      terminals.forEach((term) => {
+        const opt = document.createElement('option');
+        opt.value = term.id;
+        opt.textContent = term.name || 'Terminal (' + term.id.substring(0, 5) + ')';
+        termSelect.appendChild(opt);
+      });
+
+      // Keep active selection or fallback to first
+      const exists = terminals.some((t) => t.id === currentVal);
+      if (exists) {
+        termSelect.value = currentVal;
+      } else {
+        termSelect.value = terminals[0].id;
+        selectTerminal(terminals[0].id);
+      }
+    }
+
+    function selectTerminal(ptyId) {
+      if (!ptyId) return;
+      activeTerminalId = ptyId;
+      termPlaceholder.style.display = 'none';
+      termDiv.style.visibility = 'visible';
+      
+      // Initialize xterm if not yet created
+      if (!xterm) {
+        xterm = new Terminal({
+          cursorBlink: true,
+          fontSize: 11,
+          fontFamily: 'JetBrains Mono, monospace',
+          theme: {
+            background: '#020617',
+            foreground: '#e2e8f0',
+            cursor: '#6366f1',
+            black: '#020617',
+            red: '#ef4444',
+            green: '#10b981',
+            yellow: '#f59e0b',
+            blue: '#3b82f6',
+            magenta: '#a855f7',
+            cyan: '#06b6d4',
+            white: '#cbd5e1'
+          }
+        });
+        
+        fitAddon = new FitAddon.FitAddon();
+        xterm.loadAddon(fitAddon);
+        xterm.open(termDiv);
+        fitAddon.fit();
+
+        // Keystroke forwarding
+        xterm.onData((data) => {
+          if (conn && activeTerminalId) {
+            conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: data });
+          }
+        });
+
+        // Resize detection
+        window.addEventListener('resize', () => {
+          if (fitAddon) {
+            fitAddon.fit();
+            conn.send({ type: 'terminal_resize', ptyId: activeTerminalId, cols: xterm.cols, rows: xterm.rows });
+          }
+        });
+      } else {
+        xterm.clear();
+      }
+
+      // Tell PC we are listening to this terminal
+      conn.send({ type: 'select_terminal', ptyId: ptyId });
+      
+      // Resize fitting request
+      setTimeout(() => {
+        if (fitAddon) {
+          fitAddon.fit();
+          conn.send({ type: 'terminal_resize', ptyId: activeTerminalId, cols: xterm.cols, rows: xterm.rows });
+        }
+      }, 300);
+    }
+
+    termSelect.addEventListener('change', (e) => {
+      selectTerminal(e.target.value);
+    });
+
+    // Command submission input bar
+    const cmdInput = document.getElementById('cmd-input');
+    const sendCmdBtn = document.getElementById('send-cmd-btn');
+
+    function sendCommandInput() {
+      const val = cmdInput.value;
+      if (!val || !activeTerminalId || !conn) return;
+      conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: val + '\r' });
+      cmdInput.value = '';
+    }
+
+    sendCmdBtn.addEventListener('click', sendCommandInput);
+    cmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') sendCommandInput();
+    });
+
+    // Rename active terminal session
+    document.getElementById('rename-terminal-btn').addEventListener('click', () => {
+      if (!activeTerminalId || !conn) return;
+      const opt = termSelect.querySelector('option[value="' + activeTerminalId + '"]');
+      const currentName = opt ? opt.textContent : '';
+      const newName = prompt('Enter a new label for this terminal:', currentName);
+      if (newName && newName.trim()) {
+        conn.send({ type: 'terminal_rename', ptyId: activeTerminalId, label: newName.trim() });
+      }
+    });
+
+    // Macros shortcut buttons
+    document.querySelectorAll('.macro-btn[data-cmd]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cmd = btn.getAttribute('data-cmd');
+        if (cmd && activeTerminalId && conn) {
+          conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: cmd + '\r' });
+        }
+      });
+    });
+
+    // Downloads Widget update
+    function updateDownloads(downloads) {
+      const container = document.getElementById('downloads-container');
+      container.innerHTML = '';
+
+      if (downloads.length === 0) {
+        container.innerHTML = '<div class="no-downloads">No active downloads</div>';
+        return;
+      }
+
+      downloads.forEach((dl) => {
+        const item = document.createElement('div');
+        item.className = 'download-item';
+
+        const name = document.createElement('div');
+        name.className = 'download-name';
+        name.textContent = dl.filename || dl.url || 'Downloading task...';
+
+        const meta = document.createElement('div');
+        meta.className = 'download-meta';
+
+        const leftMeta = document.createElement('span');
+        leftMeta.textContent = dl.status + ' | ' + dl.speed;
+
+        const rightMeta = document.createElement('span');
+        rightMeta.textContent = dl.percent + '%';
+
+        meta.appendChild(leftMeta);
+        meta.appendChild(rightMeta);
+
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'progress-bar-container';
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        progressBar.style.width = dl.percent + '%';
+
+        if (dl.status === 'error' || dl.status === 'cancelled') {
+          progressBar.style.backgroundColor = 'var(--danger)';
+        } else if (dl.status === 'completed') {
+          progressBar.style.backgroundColor = 'var(--success)';
+        }
+
+        progressContainer.appendChild(progressBar);
+        item.appendChild(name);
+        item.appendChild(meta);
+        item.appendChild(progressContainer);
+        container.appendChild(item);
+      });
+    }
+
+    // Check mediaDevices support on load
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      micHelpBanner.style.display = 'flex';
+      micStatus.textContent = 'Voice unavailable (Insecure Origin)';
+    }
+
+    // Voice record capture
+    micBtn.addEventListener('click', async () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+          ? 'audio/webm;codecs=opus'
+          : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/ogg';
+
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstart = () => {
+          micBtn.classList.add('recording');
+          micStatus.textContent = 'Listening... Tap to stop';
+          transcriptionDiv.textContent = 'Recording command...';
+          transcriptionDiv.classList.add('active');
+        };
+
+        mediaRecorder.onstop = async () => {
+          micBtn.classList.remove('recording');
+          micStatus.textContent = 'Tap to speak a command';
+          transcriptionDiv.textContent = 'Transcribing command...';
+          stream.getTracks().forEach((track) => track.stop());
+
+          const blob = new Blob(audioChunks, { type: mimeType });
+          if (blob.size < 1000) {
+            transcriptionDiv.textContent = 'Audio file too short. Speak again.';
+            transcriptionDiv.classList.remove('active');
+            return;
+          }
+
+          const arrayBuffer = await blob.arrayBuffer();
+          const base64 = btoa(
+            new Uint8Array(arrayBuffer).reduce((s, b) => s + String.fromCharCode(b), '')
+          );
+
+          if (conn && activeTerminalId) {
+            // Forward base64 audio packet to the desktop PC via WebRTC
+            conn.send({
+              type: 'voice_command',
+              audio: base64,
+              mimeType: mimeType,
+              ptyId: activeTerminalId
+            });
+          } else {
+            transcriptionDiv.textContent = 'Failed: PC disconnected';
+          }
+        };
+
+        mediaRecorder.start();
+      } catch (err) {
+        console.error('Mic recording failed:', err);
+        micHelpBanner.style.display = 'flex';
+        micStatus.textContent = 'Microphone blocked';
+        transcriptionDiv.textContent = 'Mic access blocked: ' + err.name + ' - ' + err.message;
+        transcriptionDiv.classList.remove('active');
+      }
+    });
+
+    // Help Modal Overlay triggers
+    const micModal = document.getElementById('mic-modal');
+    micHelpBanner.addEventListener('click', () => {
+      micModal.style.display = 'flex';
+    });
+    document.getElementById('close-mic-modal').addEventListener('click', () => {
+      micModal.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
