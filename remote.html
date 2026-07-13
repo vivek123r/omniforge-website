@@ -140,6 +140,13 @@
       background: #020617;
       padding: 12px;
       position: relative;
+      overflow: auto;
+    }
+    
+    #terminal {
+      width: 100%;
+      height: 100%;
+      min-width: max-content;
     }
     
     .no-sessions {
@@ -525,8 +532,13 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
             Terminal Console
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <select id="terminal-select">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button id="font-dec-btn" class="macro-btn font-bold" style="padding: 4px 8px;" title="Decrease font size">A-</button>
+            <button id="font-inc-btn" class="macro-btn font-bold" style="padding: 4px 8px;" title="Increase font size">A+</button>
+            <button id="sync-terminal-btn" class="macro-btn" style="padding: 6px;" title="Force Sync Console Buffer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            </button>
+            <select id="terminal-select" style="max-width: 110px;">
               <option value="">No Active Terminals</option>
             </select>
             <button id="rename-terminal-btn" class="macro-btn" style="padding: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px;" title="Rename active terminal">
@@ -733,6 +745,17 @@
           xterm.write(msg.data);
         }
       }
+      else if (msg.type === 'terminal_history') {
+        if (msg.ptyId === activeTerminalId && xterm) {
+          xterm.clear();
+          xterm.write(msg.data);
+        }
+      }
+      else if (msg.type === 'terminal_resize_request') {
+        if (msg.ptyId === activeTerminalId && xterm) {
+          xterm.resize(msg.cols, msg.rows);
+        }
+      }
       else if (msg.type === 'voice_result') {
         if (msg.ok) {
           transcriptionDiv.textContent = 'Executed: "' + msg.text + '"';
@@ -814,12 +837,9 @@
           }
         });
 
-        // Resize detection
+        // Resize detection (Local only. Decoupled PTY resizing from mobile to prevent layout distortion)
         window.addEventListener('resize', () => {
-          if (fitAddon) {
-            fitAddon.fit();
-            conn.send({ type: 'terminal_resize', ptyId: activeTerminalId, cols: xterm.cols, rows: xterm.rows });
-          }
+          // No PTY resizing commands sent to PC
         });
       } else {
         xterm.clear();
@@ -827,14 +847,6 @@
 
       // Tell PC we are listening to this terminal
       conn.send({ type: 'select_terminal', ptyId: ptyId });
-      
-      // Resize fitting request
-      setTimeout(() => {
-        if (fitAddon) {
-          fitAddon.fit();
-          conn.send({ type: 'terminal_resize', ptyId: activeTerminalId, cols: xterm.cols, rows: xterm.rows });
-        }
-      }, 300);
     }
 
     termSelect.addEventListener('change', (e) => {
@@ -1012,6 +1024,27 @@
     });
     document.getElementById('close-mic-modal').addEventListener('click', () => {
       micModal.style.display = 'none';
+    });
+
+    // Font adjustment controls
+    let currentFontSize = 11;
+    document.getElementById('font-dec-btn').addEventListener('click', () => {
+      if (!xterm) return;
+      currentFontSize = Math.max(6, currentFontSize - 1);
+      xterm.setOption('fontSize', currentFontSize);
+    });
+
+    document.getElementById('font-inc-btn').addEventListener('click', () => {
+      if (!xterm) return;
+      currentFontSize = Math.min(24, currentFontSize + 1);
+      xterm.setOption('fontSize', currentFontSize);
+    });
+
+    // Force Sync button listener
+    document.getElementById('sync-terminal-btn').addEventListener('click', () => {
+      if (conn && activeTerminalId) {
+        conn.send({ type: 'select_terminal', ptyId: activeTerminalId });
+      }
     });
   </script>
 </body>
