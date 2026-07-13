@@ -995,19 +995,34 @@
 
       // Keep active selection or fallback to first
       const exists = terminals.some((t) => t.id === currentVal);
+      let activeChanged = false;
       if (exists) {
-        termSelect.value = currentVal;
-        activeTerminalId = currentVal;
+        if (termSelect.value !== currentVal) {
+          termSelect.value = currentVal;
+        }
+        if (activeTerminalId !== currentVal) {
+          activeTerminalId = currentVal;
+          activeChanged = true;
+        }
       } else {
         termSelect.value = terminals[0].id;
-        activeTerminalId = terminals[0].id;
+        if (activeTerminalId !== terminals[0].id) {
+          activeTerminalId = terminals[0].id;
+          activeChanged = true;
+        }
       }
 
-      // Rebuild grids only if PTY items map size changed
-      let needsRebuild = activeXterms.size !== terminals.length;
-      if (!needsRebuild) {
-        needsRebuild = terminals.some(t => !activeXterms.has(t.id));
+      // Check if we need to rebuild the terminal instances
+      let needsRebuild = false;
+      if (currentLayout === 'split') {
+        // In split layout, we must have an xterm for every terminal in the list
+        needsRebuild = activeXterms.size !== terminals.length || terminals.some(t => !activeXterms.has(t.id));
+      } else {
+        // In single layout, we only render the active terminal.
+        // We rebuild if the active terminal changed, or if it is not currently rendered.
+        needsRebuild = activeChanged || !activeXterms.has(activeTerminalId);
       }
+
       if (needsRebuild) {
         renderTerminalsLayout();
       }
