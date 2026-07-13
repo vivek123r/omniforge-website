@@ -583,6 +583,19 @@
               <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
             </button>
             <div id="mic-status" class="status-text">Tap to speak a command</div>
+
+            <!-- Voice Settings Switches -->
+            <div style="display: flex; gap: 16px; justify-content: center; width: 100%; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 0; margin: 4px 0;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text-muted);">
+                <input type="checkbox" id="voice-auto-listen" style="cursor: pointer; accent-color: var(--primary);">
+                <span>Auto-Listen</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text-muted);">
+                <input type="checkbox" id="voice-auto-submit" checked style="cursor: pointer; accent-color: var(--primary);">
+                <span>Auto-Submit</span>
+              </label>
+            </div>
+
             <div id="transcription" class="transcription-preview">Transcription will appear here...</div>
             <div id="mic-help-banner" class="mic-help-banner" style="display: none;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -758,10 +771,26 @@
       }
       else if (msg.type === 'voice_result') {
         if (msg.ok) {
-          transcriptionDiv.textContent = 'Executed: "' + msg.text + '"';
+          transcriptionDiv.textContent = 'Transcribed: "' + msg.text + '"';
+          
+          // Auto-Listen restart loop trigger
+          const autoListen = document.getElementById('voice-auto-listen').checked;
+          if (autoListen) {
+            setTimeout(() => {
+              if (typeof toggleVoiceRecording === 'function') {
+                if (!mediaRecorder || mediaRecorder.state !== 'recording') {
+                  toggleVoiceRecording();
+                }
+              }
+            }, 800);
+          }
         } else {
           transcriptionDiv.textContent = 'Failed: ' + (msg.error || 'Could not transcribe');
         }
+      }
+      else if (msg.type === 'voice_transcribe_only') {
+        cmdInput.value = msg.text;
+        cmdInput.focus();
       }
     }
 
@@ -947,8 +976,7 @@
       micStatus.textContent = 'Voice unavailable (Insecure Origin)';
     }
 
-    // Voice record capture
-    micBtn.addEventListener('click', async () => {
+    async function toggleVoiceRecording() {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
         return;
@@ -986,6 +1014,16 @@
           if (blob.size < 1000) {
             transcriptionDiv.textContent = 'Audio file too short. Speak again.';
             transcriptionDiv.classList.remove('active');
+            
+            // Auto-Listen retry loop
+            const autoListen = document.getElementById('voice-auto-listen').checked;
+            if (autoListen) {
+              setTimeout(() => {
+                if (!mediaRecorder || mediaRecorder.state !== 'recording') {
+                  toggleVoiceRecording();
+                }
+              }, 1200);
+            }
             return;
           }
 
@@ -1000,7 +1038,8 @@
               type: 'voice_command',
               audio: base64,
               mimeType: mimeType,
-              ptyId: activeTerminalId
+              ptyId: activeTerminalId,
+              autoSubmit: document.getElementById('voice-auto-submit').checked
             });
           } else {
             transcriptionDiv.textContent = 'Failed: PC disconnected';
@@ -1015,7 +1054,9 @@
         transcriptionDiv.textContent = 'Mic access blocked: ' + err.name + ' - ' + err.message;
         transcriptionDiv.classList.remove('active');
       }
-    });
+    }
+
+    micBtn.addEventListener('click', toggleVoiceRecording);
 
     // Help Modal Overlay triggers
     const micModal = document.getElementById('mic-modal');
