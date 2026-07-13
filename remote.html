@@ -141,6 +141,17 @@
       padding: 12px;
       position: relative;
       overflow: auto;
+      transition: all 0.2s ease-out;
+    }
+
+    .terminal-container.maximized {
+      position: fixed;
+      inset: 0;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999;
+      background: #020617;
+      padding: 24px 16px;
     }
     
     #terminal {
@@ -163,27 +174,11 @@
     
     .terminal-input-bar {
       display: flex;
+      align-items: flex-end;
       gap: 8px;
       padding: 12px 16px;
       border-top: 1px solid var(--border);
       background: rgba(255,255,255,0.01);
-    }
-    
-    .terminal-input-bar input {
-      flex: 1;
-      background: rgba(0,0,0,0.2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    
-    .terminal-input-bar input:focus {
-      border-color: var(--primary);
     }
     
     .btn {
@@ -224,13 +219,12 @@
       background: #0b0f17;
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 8px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 500;
       outline: none;
       cursor: pointer;
-      max-width: 160px;
     }
     
     select option {
@@ -538,11 +532,18 @@
             <button id="sync-terminal-btn" class="macro-btn" style="padding: 6px;" title="Force Sync Console Buffer">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
             </button>
+            <select id="layout-select" style="max-width: 90px; margin-right: 2px;">
+              <option value="single">Single</option>
+              <option value="split">Split</option>
+            </select>
             <select id="terminal-select" style="max-width: 110px;">
               <option value="">No Active Terminals</option>
             </select>
             <button id="rename-terminal-btn" class="macro-btn" style="padding: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px;" title="Rename active terminal">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button id="max-terminal-btn" class="macro-btn" style="padding: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px;" title="Maximize Console">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
             </button>
           </div>
         </div>
@@ -553,8 +554,8 @@
         </div>
 
         <div class="terminal-input-bar">
-          <input type="text" id="cmd-input" placeholder="Type a command and press Enter..." autocomplete="off">
-          <button id="send-cmd-btn" class="btn" style="width: auto; padding: 0 20px;">Send</button>
+          <textarea id="cmd-input" placeholder="Type a command..." rows="1" class="flex-1 bg-black/20 border border-white/10 rounded-lg p-2 text-white font-mono text-xs outline-none focus:border-indigo-500 resize-none overflow-y-hidden" style="max-height: 120px; min-height: 36px; line-height: 1.4;"></textarea>
+          <button id="send-cmd-btn" class="btn" style="width: auto; padding: 0 20px; height: 36px;">Send</button>
         </div>
 
         <div class="macro-row">
@@ -655,8 +656,11 @@
     const token = urlParams.get('token');
     
     let activeTerminalId = '';
-    let xterm = null;
-    let fitAddon = null;
+    let currentLayout = 'single';
+    let activeXterms = new Map(); // ptyId -> { term, fitAddon }
+    let globalTerminalsList = []; // Array of { id, name }
+    let currentFontSize = 11;
+
     let peer = null;
     let conn = null;
     let mediaRecorder = null;
@@ -669,9 +673,11 @@
     const pairingError = document.getElementById('pairing-error');
     const errorMessage = document.getElementById('error-message');
     
+    const layoutSelect = document.getElementById('layout-select');
     const termSelect = document.getElementById('terminal-select');
     const termPlaceholder = document.getElementById('no-terminal-placeholder');
-    const termDiv = document.getElementById('terminal');
+    const termContainer = document.getElementById('terminal-container');
+    const maxBtn = document.getElementById('max-terminal-btn');
     
     const micBtn = document.getElementById('mic-btn');
     const micStatus = document.getElementById('mic-status');
@@ -754,19 +760,31 @@
         updateDownloads(msg.downloads || []);
       }
       else if (msg.type === 'terminal_data') {
-        if (msg.ptyId === activeTerminalId && xterm) {
-          xterm.write(msg.data);
+        const client = activeXterms.get(msg.ptyId);
+        if (client) {
+          client.term.write(msg.data);
         }
       }
       else if (msg.type === 'terminal_history') {
-        if (msg.ptyId === activeTerminalId && xterm) {
-          xterm.clear();
-          xterm.write(msg.data);
+        const client = activeXterms.get(msg.ptyId);
+        if (client) {
+          client.term.clear();
+          client.term.write(msg.data);
         }
       }
+      else if (msg.type === 'all_terminal_history') {
+        Object.keys(msg.histories).forEach((ptyId) => {
+          const client = activeXterms.get(ptyId);
+          if (client) {
+            client.term.clear();
+            client.term.write(msg.histories[ptyId]);
+          }
+        });
+      }
       else if (msg.type === 'terminal_resize_request') {
-        if (msg.ptyId === activeTerminalId && xterm) {
-          xterm.resize(msg.cols, msg.rows);
+        const client = activeXterms.get(msg.ptyId);
+        if (client) {
+          client.term.resize(msg.cols, msg.rows);
         }
       }
       else if (msg.type === 'voice_result') {
@@ -791,11 +809,170 @@
       else if (msg.type === 'voice_transcribe_only') {
         cmdInput.value = msg.text;
         cmdInput.focus();
+        cmdInput.dispatchEvent(new Event('input')); // Grow textarea
       }
     }
 
-    // Terminals list synchronizer
+    // Terminals layout dynamic renderer
+    function renderTerminalsLayout() {
+      // Dispose all existing terminals
+      activeXterms.forEach((client) => {
+        client.term.dispose();
+      });
+      activeXterms.clear();
+      
+      termContainer.innerHTML = '';
+      
+      if (globalTerminalsList.length === 0) {
+        termContainer.innerHTML = '<div id="no-terminal-placeholder" class="no-sessions">No active terminal session selected</div>';
+        activeTerminalId = '';
+        return;
+      }
+
+      if (currentLayout === 'single') {
+        // Single terminal layout
+        const termDiv = document.createElement('div');
+        termDiv.id = 'terminal';
+        termDiv.style.width = '100%';
+        termDiv.style.height = '100%';
+        termDiv.style.minWidth = 'max-content';
+        termContainer.appendChild(termDiv);
+
+        if (!activeTerminalId || !globalTerminalsList.some(t => t.id === activeTerminalId)) {
+          activeTerminalId = globalTerminalsList[0].id;
+        }
+        termSelect.value = activeTerminalId;
+        
+        initXtermInstance(activeTerminalId, termDiv);
+        
+        // Notify PC to send history for this active PTY
+        if (conn) {
+          conn.send({ type: 'set_listening_mode', mode: 'single', activePtyId: activeTerminalId });
+          conn.send({ type: 'select_terminal', ptyId: activeTerminalId });
+        }
+      } else {
+        // Split view multi-terminal layout
+        const gridDiv = document.createElement('div');
+        gridDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full';
+        gridDiv.id = 'split-grid';
+        termContainer.appendChild(gridDiv);
+
+        if (!activeTerminalId || !globalTerminalsList.some(t => t.id === activeTerminalId)) {
+          activeTerminalId = globalTerminalsList[0].id;
+        }
+
+        globalTerminalsList.forEach((term) => {
+          const card = document.createElement('div');
+          card.className = 'flex flex-col border border-white/5 bg-slate-950/40 rounded-lg overflow-hidden h-[280px] transition-all duration-200';
+          card.setAttribute('data-pty-id', term.id);
+          if (term.id === activeTerminalId) {
+            card.classList.add('border-indigo-500/80', 'ring-1', 'ring-indigo-500/30');
+          }
+
+          // Header
+          const header = document.createElement('div');
+          header.className = 'bg-black/30 px-3 py-1.5 text-[10px] font-semibold flex justify-between items-center select-none border-b border-white/5 cursor-pointer';
+          header.innerHTML = `
+            <span class="text-slate-300 font-sans font-medium">${term.name}</span>
+            <span class="indicator text-indigo-400 font-mono text-[9px] uppercase tracking-wider">${term.id === activeTerminalId ? 'Active' : 'Click to Focus'}</span>
+          `;
+          
+          header.addEventListener('click', () => {
+            focusSplitTerminal(term.id);
+          });
+
+          const consoleDiv = document.createElement('div');
+          consoleDiv.className = 'flex-1 p-2 overflow-auto bg-[#020617]';
+          consoleDiv.id = `term-split-${term.id}`;
+          
+          consoleDiv.addEventListener('click', () => {
+            focusSplitTerminal(term.id);
+          });
+
+          card.appendChild(header);
+          card.appendChild(consoleDiv);
+          gridDiv.appendChild(card);
+
+          initXtermInstance(term.id, consoleDiv);
+        });
+
+        // Notify PC to listen to all sessions in Split mode
+        if (conn) {
+          conn.send({ type: 'set_listening_mode', mode: 'all', activePtyId: activeTerminalId });
+          conn.send({ type: 'get_all_history' });
+        }
+      }
+    }
+
+    function initXtermInstance(ptyId, element) {
+      const term = new Terminal({
+        cursorBlink: true,
+        fontSize: currentFontSize,
+        fontFamily: 'JetBrains Mono, monospace',
+        theme: {
+          background: '#020617',
+          foreground: '#e2e8f0',
+          cursor: '#6366f1',
+          black: '#020617',
+          red: '#ef4444',
+          green: '#10b981',
+          yellow: '#f59e0b',
+          blue: '#3b82f6',
+          magenta: '#a855f7',
+          cyan: '#06b6d4',
+          white: '#cbd5e1'
+        }
+      });
+      
+      const fitAddon = new FitAddon.FitAddon();
+      term.loadAddon(fitAddon);
+      term.open(element);
+      fitAddon.fit();
+
+      // Forward keys to the backend
+      term.onData((data) => {
+        if (conn && ptyId) {
+          conn.send({ type: 'terminal_input', ptyId: ptyId, data: data });
+        }
+      });
+
+      activeXterms.set(ptyId, { term, fitAddon });
+    }
+
+    function focusSplitTerminal(ptyId) {
+      if (!ptyId || ptyId === activeTerminalId) return;
+      
+      // Update highlights in grid card borders
+      document.querySelectorAll('#split-grid > div').forEach((card) => {
+        const id = card.getAttribute('data-pty-id');
+        const indicator = card.querySelector('.indicator');
+        if (id === ptyId) {
+          card.classList.add('border-indigo-500/80', 'ring-1', 'ring-indigo-500/30');
+          if (indicator) {
+            indicator.textContent = 'Active';
+            indicator.className = 'indicator text-indigo-400 font-mono text-[9px] uppercase tracking-wider';
+          }
+        } else {
+          card.classList.remove('border-indigo-500/80', 'ring-1', 'ring-indigo-500/30');
+          if (indicator) {
+            indicator.textContent = 'Click to Focus';
+            indicator.className = 'indicator text-slate-500 font-mono text-[9px] uppercase tracking-wider';
+          }
+        }
+      });
+
+      activeTerminalId = ptyId;
+      termSelect.value = ptyId;
+      
+      // Notify PC of active target focus
+      if (conn) {
+        conn.send({ type: 'set_listening_mode', mode: 'all', activePtyId: ptyId });
+      }
+    }
+
     function updateActiveTerminals(terminals) {
+      globalTerminalsList = terminals;
+
       const currentVal = termSelect.value;
       termSelect.innerHTML = '';
 
@@ -804,9 +981,8 @@
         opt.value = '';
         opt.textContent = 'No Active Terminals';
         termSelect.appendChild(opt);
-        termPlaceholder.style.display = 'flex';
-        termDiv.style.visibility = 'hidden';
         activeTerminalId = '';
+        renderTerminalsLayout();
         return;
       }
 
@@ -821,81 +997,69 @@
       const exists = terminals.some((t) => t.id === currentVal);
       if (exists) {
         termSelect.value = currentVal;
+        activeTerminalId = currentVal;
       } else {
         termSelect.value = terminals[0].id;
-        selectTerminal(terminals[0].id);
-      }
-    }
-
-    function selectTerminal(ptyId) {
-      if (!ptyId) return;
-      activeTerminalId = ptyId;
-      termPlaceholder.style.display = 'none';
-      termDiv.style.visibility = 'visible';
-      
-      // Initialize xterm if not yet created
-      if (!xterm) {
-        xterm = new Terminal({
-          cursorBlink: true,
-          fontSize: 11,
-          fontFamily: 'JetBrains Mono, monospace',
-          theme: {
-            background: '#020617',
-            foreground: '#e2e8f0',
-            cursor: '#6366f1',
-            black: '#020617',
-            red: '#ef4444',
-            green: '#10b981',
-            yellow: '#f59e0b',
-            blue: '#3b82f6',
-            magenta: '#a855f7',
-            cyan: '#06b6d4',
-            white: '#cbd5e1'
-          }
-        });
-        
-        fitAddon = new FitAddon.FitAddon();
-        xterm.loadAddon(fitAddon);
-        xterm.open(termDiv);
-        fitAddon.fit();
-
-        // Keystroke forwarding
-        xterm.onData((data) => {
-          if (conn && activeTerminalId) {
-            conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: data });
-          }
-        });
-
-        // Resize detection (Local only. Decoupled PTY resizing from mobile to prevent layout distortion)
-        window.addEventListener('resize', () => {
-          // No PTY resizing commands sent to PC
-        });
-      } else {
-        xterm.clear();
+        activeTerminalId = terminals[0].id;
       }
 
-      // Tell PC we are listening to this terminal
-      conn.send({ type: 'select_terminal', ptyId: ptyId });
+      // Rebuild grids only if PTY items map size changed
+      let needsRebuild = activeXterms.size !== terminals.length;
+      if (!needsRebuild) {
+        needsRebuild = terminals.some(t => !activeXterms.has(t.id));
+      }
+      if (needsRebuild) {
+        renderTerminalsLayout();
+      }
     }
 
     termSelect.addEventListener('change', (e) => {
-      selectTerminal(e.target.value);
+      activeTerminalId = e.target.value;
+      renderTerminalsLayout();
     });
 
-    // Command submission input bar
+    layoutSelect.addEventListener('change', (e) => {
+      currentLayout = e.target.value;
+      if (currentLayout === 'split') {
+        termSelect.style.display = 'none';
+      } else {
+        termSelect.style.display = 'inline-block';
+      }
+      renderTerminalsLayout();
+    });
+
+    maxBtn.addEventListener('click', () => {
+      termContainer.classList.toggle('maximized');
+      setTimeout(() => {
+        activeXterms.forEach((client) => {
+          client.fitAddon.fit();
+        });
+      }, 100);
+    });
+
+    // Command submission input bar (textarea)
     const cmdInput = document.getElementById('cmd-input');
     const sendCmdBtn = document.getElementById('send-cmd-btn');
+
+    cmdInput.addEventListener('input', () => {
+      cmdInput.style.height = 'auto';
+      cmdInput.style.height = Math.min(120, cmdInput.scrollHeight) + 'px';
+    });
 
     function sendCommandInput() {
       const val = cmdInput.value;
       if (!val || !activeTerminalId || !conn) return;
-      conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: val + '\r' });
+      conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: val + '\n' });
       cmdInput.value = '';
+      cmdInput.style.height = '36px'; // reset
     }
 
     sendCmdBtn.addEventListener('click', sendCommandInput);
     cmdInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') sendCommandInput();
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendCommandInput();
+      }
     });
 
     // Rename active terminal session
@@ -914,7 +1078,7 @@
       btn.addEventListener('click', () => {
         const cmd = btn.getAttribute('data-cmd');
         if (cmd && activeTerminalId && conn) {
-          conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: cmd + '\r' });
+          conn.send({ type: 'terminal_input', ptyId: activeTerminalId, data: cmd + '\n' });
         }
       });
     });
@@ -1068,23 +1232,31 @@
     });
 
     // Font adjustment controls
-    let currentFontSize = 11;
     document.getElementById('font-dec-btn').addEventListener('click', () => {
-      if (!xterm) return;
       currentFontSize = Math.max(6, currentFontSize - 1);
-      xterm.setOption('fontSize', currentFontSize);
+      activeXterms.forEach((client) => {
+        client.term.setOption('fontSize', currentFontSize);
+        client.fitAddon.fit();
+      });
     });
 
     document.getElementById('font-inc-btn').addEventListener('click', () => {
-      if (!xterm) return;
       currentFontSize = Math.min(24, currentFontSize + 1);
-      xterm.setOption('fontSize', currentFontSize);
+      activeXterms.forEach((client) => {
+        client.term.setOption('fontSize', currentFontSize);
+        client.fitAddon.fit();
+      });
     });
 
     // Force Sync button listener
     document.getElementById('sync-terminal-btn').addEventListener('click', () => {
-      if (conn && activeTerminalId) {
-        conn.send({ type: 'select_terminal', ptyId: activeTerminalId });
+      if (!conn) return;
+      if (currentLayout === 'single') {
+        if (activeTerminalId) {
+          conn.send({ type: 'select_terminal', ptyId: activeTerminalId });
+        }
+      } else {
+        conn.send({ type: 'get_all_history' });
       }
     });
   </script>
