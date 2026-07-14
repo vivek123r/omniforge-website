@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>OmniForge Remote Control</title>
   
   <!-- PeerJS WebRTC, Xterm.js Console, Tailwind CSS and outfit font -->
@@ -103,7 +103,7 @@
     
     @media (min-width: 900px) {
       .dashboard-grid {
-        grid-template-columns: 1.6fr 1fr;
+        grid-template-columns: 1fr;
       }
     }
     
@@ -136,7 +136,8 @@
     }
     
     .terminal-container {
-      height: 380px;
+      flex: 1 1 auto;
+      min-height: 340px;
       background: #020617;
       padding: 12px;
       position: relative;
@@ -144,13 +145,22 @@
       transition: all 0.2s ease-out;
     }
 
-    .terminal-container.maximized {
+    /* Maximized state now applies to the whole terminal card so the command
+       input bar + macro row stay usable (previously only the container was
+       fixed, which hid the input bar on mobile). */
+    .card.maximized {
       position: fixed;
       inset: 0;
       width: 100vw !important;
       height: 100vh !important;
+      height: 100dvh !important;
       z-index: 9999;
-      background: #020617;
+      border-radius: 0;
+      background: var(--card);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .card.maximized .terminal-container {
       padding: 24px 16px;
     }
     
@@ -482,6 +492,193 @@
       from { transform: scale(0.95); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
+
+    /* ── Session tab-strip (shown in Split mode) ───────────────── */
+    .session-tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.15);
+      scrollbar-width: thin;
+    }
+
+    .session-tab {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .session-tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .session-tab.active {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: var(--text);
+    }
+
+    .session-tab .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    /* Toolbar controls wrap on narrow screens instead of overflowing */
+    .toolbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* ── Split: vertical stack of full terminal consoles ────────── */
+    .split-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .split-terminal-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 520px;
+      flex-shrink: 0;
+    }
+
+    .split-terminal-card.active-split {
+      border-color: rgba(99, 102, 241, 0.55);
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25);
+    }
+
+    .split-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .split-card-header .indicator {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+    }
+
+    .split-card-header .indicator.idle {
+      color: var(--text-muted);
+    }
+
+    /* ── Voice / Downloads popovers ────────────────────────────── */
+    .popover {
+      position: fixed;
+      top: 60px;
+      right: 12px;
+      width: min(360px, calc(100vw - 24px));
+      max-height: min(72vh, 560px);
+      overflow-y: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+    }
+
+    .popover.open {
+      display: flex;
+    }
+
+    .popover-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      background: var(--card);
+    }
+
+    .popover .voice-control-panel {
+      padding: 16px;
+    }
+
+    .popover .download-list {
+      padding: 12px;
+      max-height: none;
+    }
+
+    /* ── Mobile-first responsive layout ────────────────────────── */
+    @media (max-width: 899px) {
+      body {
+        overflow: hidden; /* app-like: terminal manages its own scroll */
+      }
+
+      header {
+        padding: 12px 16px;
+      }
+
+      .card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .card-header > .card-title {
+        flex: 1 1 auto;
+      }
+
+      main#dashboard {
+        padding: 8px;
+        height: calc(100dvh - 52px);
+      }
+
+      .dashboard-grid {
+        display: block;
+        height: 100%;
+        padding: 0;
+        max-width: none;
+      }
+
+      .card {
+        height: 100%;
+      }
+
+      /* Split terminals are full-height cards; the container scrolls */
+      .split-terminal-card {
+        min-height: 78vh;
+      }
+    }
   </style>
 </head>
 <body>
@@ -520,17 +717,23 @@
     <div class="dashboard-grid">
       
       <!-- Terminal Pane -->
-      <section class="card">
+      <section class="card" id="panel-terminal">
         <div class="card-header">
           <div class="card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 17l6-6-6-6M12 19h8"/></svg>
             Terminal Console
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
+          <div class="toolbar-controls">
             <button id="font-dec-btn" class="macro-btn font-bold" style="padding: 4px 8px;" title="Decrease font size">A-</button>
             <button id="font-inc-btn" class="macro-btn font-bold" style="padding: 4px 8px;" title="Increase font size">A+</button>
             <button id="sync-terminal-btn" class="macro-btn" style="padding: 6px;" title="Force Sync Console Buffer">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            </button>
+            <button id="voice-btn" class="macro-btn" style="padding: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px;" title="Voice commands">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8"/></svg>
+            </button>
+            <button id="downloads-btn" class="macro-btn" style="padding: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px;" title="Active downloads">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             </button>
             <select id="layout-select" style="max-width: 90px; margin-right: 2px;">
               <option value="single">Single</option>
@@ -547,6 +750,8 @@
             </button>
           </div>
         </div>
+
+        <div id="session-tabs" class="session-tabs" style="display: none;"></div>
 
         <div class="terminal-container" id="terminal-container">
           <div id="no-terminal-placeholder" class="no-sessions">No active terminal session selected</div>
@@ -568,56 +773,47 @@
         </div>
       </section>
 
-      <!-- Right Column Controls -->
-      <div style="display: flex; flex-direction: column; gap: 24px;">
-        
-        <!-- Voice Control -->
-        <section class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8"/></svg>
-              Voice Commands
-            </div>
-          </div>
-          <div class="voice-control-panel">
-            <button id="mic-btn" class="mic-button">
-              <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
-            </button>
-            <div id="mic-status" class="status-text">Tap to speak a command</div>
+      <!-- Voice popover -->
+      <div id="voice-popover" class="popover">
+        <div class="popover-header">
+          <span>Voice Commands</span>
+          <button class="close-btn" data-close-popover="voice-popover">&times;</button>
+        </div>
+        <div class="voice-control-panel">
+          <button id="mic-btn" class="mic-button">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+          </button>
+          <div id="mic-status" class="status-text">Tap to speak a command</div>
 
-            <!-- Voice Settings Switches -->
-            <div style="display: flex; gap: 16px; justify-content: center; width: 100%; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 0; margin: 4px 0;">
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text-muted);">
-                <input type="checkbox" id="voice-auto-listen" style="cursor: pointer; accent-color: var(--primary);">
-                <span>Auto-Listen</span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text-muted);">
-                <input type="checkbox" id="voice-auto-submit" checked style="cursor: pointer; accent-color: var(--primary);">
-                <span>Auto-Submit</span>
-              </label>
-            </div>
-
-            <div id="transcription" class="transcription-preview">Transcription will appear here...</div>
-            <div id="mic-help-banner" class="mic-help-banner" style="display: none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-              <span><strong>Mic Permission Alert:</strong> Click here for troubleshooting guide.</span>
-            </div>
+          <!-- Voice Settings Switches -->
+          <div style="display: flex; gap: 16px; justify-content: center; width: 100%; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 0; margin: 4px 0;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text-muted);">
+              <input type="checkbox" id="voice-auto-listen" style="cursor: pointer; accent-color: var(--primary);">
+              <span>Auto-Listen</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; cursor: pointer; color: var(--text-muted);">
+              <input type="checkbox" id="voice-auto-submit" checked style="cursor: pointer; accent-color: var(--primary);">
+              <span>Auto-Submit</span>
+            </label>
           </div>
-        </section>
 
-        <!-- Live Downloads Widget -->
-        <section class="card">
-          <div class="card-header">
-            <div class="card-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-              Active Downloads
-            </div>
+          <div id="transcription" class="transcription-preview">Transcription will appear here...</div>
+          <div id="mic-help-banner" class="mic-help-banner" style="display: none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span><strong>Mic Permission Alert:</strong> Click here for troubleshooting guide.</span>
           </div>
-          <div id="downloads-container" class="download-list">
-            <div class="no-downloads">No active downloads</div>
-          </div>
-        </section>
+        </div>
+      </div>
 
+      <!-- Downloads popover -->
+      <div id="downloads-popover" class="popover">
+        <div class="popover-header">
+          <span>Active Downloads</span>
+          <button class="close-btn" data-close-popover="downloads-popover">&times;</button>
+        </div>
+        <div id="downloads-container" class="download-list">
+          <div class="no-downloads">No active downloads</div>
+        </div>
       </div>
     </div>
   </main>
@@ -813,6 +1009,38 @@
       }
     }
 
+    // ── Session tab-strip (Split mode) ──────────────────────────────────────
+    function buildSessionTabs() {
+      const tabsEl = document.getElementById('session-tabs');
+      if (!tabsEl) return;
+      tabsEl.innerHTML = '';
+      tabsEl.style.display = 'flex';
+      globalTerminalsList.forEach((term) => {
+        const chip = document.createElement('button');
+        chip.className = 'session-tab' + (term.id === activeTerminalId ? ' active' : '');
+        chip.setAttribute('data-pty-id', term.id);
+        chip.innerHTML = '<span class="dot"></span>' + (term.name || ('Terminal ' + term.id.substring(0, 5)));
+        chip.addEventListener('click', () => focusSplitTerminal(term.id));
+        tabsEl.appendChild(chip);
+      });
+    }
+
+    function hideSessionTabs() {
+      const tabsEl = document.getElementById('session-tabs');
+      if (tabsEl) {
+        tabsEl.style.display = 'none';
+        tabsEl.innerHTML = '';
+      }
+    }
+
+    function updateSessionTabActive(ptyId) {
+      const tabsEl = document.getElementById('session-tabs');
+      if (!tabsEl) return;
+      tabsEl.querySelectorAll('.session-tab').forEach((chip) => {
+        chip.classList.toggle('active', chip.getAttribute('data-pty-id') === ptyId);
+      });
+    }
+
     // Terminals layout dynamic renderer
     function renderTerminalsLayout() {
       // Dispose all existing terminals
@@ -842,20 +1070,21 @@
           activeTerminalId = globalTerminalsList[0].id;
         }
         termSelect.value = activeTerminalId;
-        
+
         initXtermInstance(activeTerminalId, termDiv);
-        
+        hideSessionTabs();
+
         // Notify PC to send history for this active PTY
         if (conn) {
           conn.send({ type: 'set_listening_mode', mode: 'single', activePtyId: activeTerminalId });
           conn.send({ type: 'select_terminal', ptyId: activeTerminalId });
         }
       } else {
-        // Split view multi-terminal layout
-        const gridDiv = document.createElement('div');
-        gridDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full';
-        gridDiv.id = 'split-grid';
-        termContainer.appendChild(gridDiv);
+        // Split view: vertical stack of full terminal consoles (one per session)
+        const stack = document.createElement('div');
+        stack.className = 'split-stack';
+        stack.id = 'split-stack';
+        termContainer.appendChild(stack);
 
         if (!activeTerminalId || !globalTerminalsList.some(t => t.id === activeTerminalId)) {
           activeTerminalId = globalTerminalsList[0].id;
@@ -863,38 +1092,34 @@
 
         globalTerminalsList.forEach((term) => {
           const card = document.createElement('div');
-          card.className = 'flex flex-col border border-white/5 bg-slate-950/40 rounded-lg overflow-hidden h-[280px] transition-all duration-200';
+          card.className = 'split-terminal-card' + (term.id === activeTerminalId ? ' active-split' : '');
           card.setAttribute('data-pty-id', term.id);
-          if (term.id === activeTerminalId) {
-            card.classList.add('border-indigo-500/80', 'ring-1', 'ring-indigo-500/30');
-          }
 
-          // Header
           const header = document.createElement('div');
-          header.className = 'bg-black/30 px-3 py-1.5 text-[10px] font-semibold flex justify-between items-center select-none border-b border-white/5 cursor-pointer';
+          header.className = 'split-card-header';
           header.innerHTML = `
-            <span class="text-slate-300 font-sans font-medium">${term.name}</span>
-            <span class="indicator text-indigo-400 font-mono text-[9px] uppercase tracking-wider">${term.id === activeTerminalId ? 'Active' : 'Click to Focus'}</span>
+            <span>${term.name || ('Terminal ' + term.id.substring(0, 5))}</span>
+            <span class="indicator ${term.id === activeTerminalId ? '' : 'idle'}">${term.id === activeTerminalId ? 'Active' : 'Click to focus'}</span>
           `;
-          
           header.addEventListener('click', () => {
             focusSplitTerminal(term.id);
           });
 
           const consoleDiv = document.createElement('div');
-          consoleDiv.className = 'flex-1 p-2 overflow-auto bg-[#020617]';
+          consoleDiv.className = 'terminal-container';
           consoleDiv.id = `term-split-${term.id}`;
-          
           consoleDiv.addEventListener('click', () => {
             focusSplitTerminal(term.id);
           });
 
           card.appendChild(header);
           card.appendChild(consoleDiv);
-          gridDiv.appendChild(card);
+          stack.appendChild(card);
 
           initXtermInstance(term.id, consoleDiv);
         });
+
+        buildSessionTabs();
 
         // Notify PC to listen to all sessions in Split mode
         if (conn) {
@@ -940,30 +1165,39 @@
     }
 
     function focusSplitTerminal(ptyId) {
-      if (!ptyId || ptyId === activeTerminalId) return;
-      
-      // Update highlights in grid card borders
-      document.querySelectorAll('#split-grid > div').forEach((card) => {
+      if (!ptyId || ptyId === activeTerminalId) {
+        const same = document.querySelector('#split-stack > .split-terminal-card[data-pty-id="' + ptyId + '"]');
+        if (same) same.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
+      // Update highlight + indicator on each stacked terminal card
+      document.querySelectorAll('#split-stack > .split-terminal-card').forEach((card) => {
         const id = card.getAttribute('data-pty-id');
         const indicator = card.querySelector('.indicator');
         if (id === ptyId) {
-          card.classList.add('border-indigo-500/80', 'ring-1', 'ring-indigo-500/30');
+          card.classList.add('active-split');
           if (indicator) {
             indicator.textContent = 'Active';
-            indicator.className = 'indicator text-indigo-400 font-mono text-[9px] uppercase tracking-wider';
+            indicator.className = 'indicator';
           }
         } else {
-          card.classList.remove('border-indigo-500/80', 'ring-1', 'ring-indigo-500/30');
+          card.classList.remove('active-split');
           if (indicator) {
-            indicator.textContent = 'Click to Focus';
-            indicator.className = 'indicator text-slate-500 font-mono text-[9px] uppercase tracking-wider';
+            indicator.textContent = 'Click to focus';
+            indicator.className = 'indicator idle';
           }
         }
       });
 
       activeTerminalId = ptyId;
       termSelect.value = ptyId;
-      
+      updateSessionTabActive(ptyId);
+
+      // Scroll the focused terminal into view
+      const activeCard = document.querySelector('#split-stack > .split-terminal-card[data-pty-id="' + ptyId + '"]');
+      if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
       // Notify PC of active target focus
       if (conn) {
         conn.send({ type: 'set_listening_mode', mode: 'all', activePtyId: ptyId });
@@ -1044,12 +1278,63 @@
     });
 
     maxBtn.addEventListener('click', () => {
-      termContainer.classList.toggle('maximized');
-      setTimeout(() => {
-        activeXterms.forEach((client) => {
-          client.fitAddon.fit();
-        });
-      }, 100);
+      const terminalCard = document.getElementById('panel-terminal');
+      if (terminalCard) terminalCard.classList.toggle('maximized');
+      // Re-fit after the layout settles (fullscreen vs inline)
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          activeXterms.forEach((client) => {
+            client.fitAddon.fit();
+          });
+        }, 60);
+      });
+    });
+
+    // ── Header Voice / Downloads buttons + popovers ──────────────
+    const voiceBtn = document.getElementById('voice-btn');
+    const downloadsBtn = document.getElementById('downloads-btn');
+    const voicePopover = document.getElementById('voice-popover');
+    const downloadsPopover = document.getElementById('downloads-popover');
+    const popovers = [voicePopover, downloadsPopover];
+
+    function togglePopover(pop) {
+      const willOpen = !pop.classList.contains('open');
+      popovers.forEach((p) => { if (p !== pop) p.classList.remove('open'); });
+      pop.classList.toggle('open', willOpen);
+    }
+
+    voiceBtn.addEventListener('click', () => {
+      // Clicking the voice button activates voice directly
+      if (typeof toggleVoiceRecording === 'function') toggleVoiceRecording();
+      togglePopover(voicePopover);
+    });
+
+    downloadsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePopover(downloadsPopover);
+    });
+
+    // Close buttons inside popovers
+    document.querySelectorAll('[data-close-popover]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const pop = document.getElementById(btn.getAttribute('data-close-popover'));
+        if (pop) pop.classList.remove('open');
+      });
+    });
+
+    // Close on outside click / Escape
+    document.addEventListener('click', (e) => {
+      popovers.forEach((pop) => {
+        if (!pop.classList.contains('open')) return;
+        if (pop.contains(e.target)) return;
+        if (e.target === voiceBtn || e.target === downloadsBtn) return;
+        if (voiceBtn.contains(e.target) || downloadsBtn.contains(e.target)) return;
+        pop.classList.remove('open');
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') popovers.forEach((p) => p.classList.remove('open'));
     });
 
     // Command submission input bar (textarea)
